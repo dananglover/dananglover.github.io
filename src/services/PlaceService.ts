@@ -13,7 +13,38 @@ export class PlaceService {
   }
 
   async createPlace(placeData: CreatePlaceForm, userId: string): Promise<Place> {
-    return this.repository.createPlace(placeData, userId);
+    try {
+      // Validate required fields
+      if (!placeData.name || !placeData.description || !placeData.price || !placeData.placeTypeId || !placeData.location) {
+        throw new Error('All fields are required');
+      }
+
+      // Validate photos
+      if (!placeData.photos || placeData.photos.length === 0) {
+        throw new Error('At least one photo is required');
+      }
+
+      // Validate photo sizes (max 10MB each)
+      const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB in bytes
+      for (const photo of placeData.photos) {
+        if (photo.size > MAX_FILE_SIZE) {
+          throw new Error(`Photo ${photo.name} is too large. Maximum size is 10MB`);
+        }
+      }
+
+      console.log('Creating place with service...', {
+        name: placeData.name,
+        photoCount: placeData.photos.length,
+        userId
+      });
+
+      const place = await this.repository.createPlace(placeData, userId);
+      console.log('Place created successfully in service');
+      return place;
+    } catch (error) {
+      console.error('Error in PlaceService.createPlace:', error);
+      throw error; // Re-throw to be handled by the UI layer
+    }
   }
 
   async updatePlace(id: string, placeData: Partial<CreatePlaceForm>, userId: string): Promise<Place> {
