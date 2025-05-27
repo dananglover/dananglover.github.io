@@ -1,6 +1,9 @@
-
-import { supabase } from '@/integrations/supabase/client';
+import { supabase } from '@/lib/supabase';
+import { Database } from '@/integrations/supabase/types';
 import { User } from '@/types';
+
+type UserRow = Database['public']['Tables']['users']['Row'];
+type UserInsert = Database['public']['Tables']['users']['Insert'];
 
 export class AuthRepository {
   async signInWithGoogle() {
@@ -26,39 +29,31 @@ export class AuthRepository {
     if (error) throw error;
     if (!user) return null;
 
-    // Get user profile from our users table
-    const { data: profile, error: profileError } = await supabase
+    // Prepare user profile data
+    const profileData: UserInsert = {
+      id: user.id,
+      email: user.email!,
+      name: user.user_metadata?.full_name || user.email!.split('@')[0],
+      avatar: user.user_metadata?.avatar_url || null,
+      updatedAt: new Date().toISOString()
+    };
+
+    // Use upsert to create or update the profile
+    const { data: profile, error: upsertError } = await supabase
       .from('users')
-      .select('*')
-      .eq('id', user.id)
+      .upsert({
+        ...profileData,
+        // Only set createdAt if this is a new profile
+        createdAt: new Date().toISOString()
+      }, {
+        onConflict: 'id',
+        ignoreDuplicates: false // Update if exists
+      })
+      .select()
       .single();
 
-    if (profileError && profileError.code !== 'PGRST116') {
-      throw profileError;
-    }
-
-    // If profile doesn't exist, create it
-    if (!profile) {
-      const newProfile = {
-        id: user.id,
-        email: user.email!,
-        name: user.user_metadata?.full_name || user.email!.split('@')[0],
-        avatar: user.user_metadata?.avatar_url,
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString()
-      };
-
-      const { data: createdProfile, error: createError } = await supabase
-        .from('users')
-        .insert(newProfile)
-        .select()
-        .single();
-
-      if (createError) throw createError;
-      return createdProfile;
-    }
-
-    return profile;
+    if (upsertError) throw upsertError;
+    return profile as User;
   }
 
   onAuthStateChange(callback: (user: User | null) => void) {

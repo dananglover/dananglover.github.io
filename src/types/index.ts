@@ -1,13 +1,12 @@
-
 // Core entity types
-export interface User {
+export type User = {
   id: string;
   email: string;
   name: string;
-  avatar?: string;
-  createdAt: string;
-  updatedAt: string;
-}
+  avatar: string | null;
+  createdAt: string | null;
+  updatedAt: string | null;
+};
 
 export interface PlaceType {
   id: string;
