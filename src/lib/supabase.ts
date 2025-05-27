@@ -1,13 +1,12 @@
 import { createClient } from '@supabase/supabase-js';
+import type { Database } from '@/integrations/supabase/types';
 
-const supabaseUrl = import.meta.env.VITE_SUPABASE_URL || '';
-const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY || '';
+// Use the same environment variables as Lovable's client
+const supabaseUrl = "https://otocyunlsazwpxqwxlwv.supabase.co";
+const supabaseKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im90b2N5dW5sc2F6d3B4cXd4bHd2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDgzNjkwNzksImV4cCI6MjA2Mzk0NTA3OX0.ezk-Lcd7QKNDD6i4Z1wzkI3pUsOOt27IoWuBR6DYvj8";
 
-if (!supabaseUrl || !supabaseAnonKey) {
-  console.warn('Supabase URL and Anon Key are required. Please check your environment variables.');
-}
-
-export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
+// Create and export the Supabase client with auth configuration
+export const supabase = createClient<Database>(supabaseUrl, supabaseKey, {
   auth: {
     autoRefreshToken: true,
     persistSession: true,
@@ -15,13 +14,5 @@ export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
   }
 });
 
-// Database table names following snake_case convention
-export const TABLES = {
-  USERS: 'users',
-  PLACE_TYPES: 'place_type',
-  PLACES: 'places',
-  REVIEWS: 'reviews',
-  FAVORITES: 'favorites',
-  BLOG_POSTS: 'blog_posts',
-  COMMENTS: 'comments'
-} as const; 
+// Re-export TABLES from constants
+export { TABLES } from './constants'; 

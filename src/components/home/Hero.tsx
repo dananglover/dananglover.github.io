@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Button } from '@/components/ui/button';
 import { MapPin, BookOpen, Star } from 'lucide-react';
@@ -26,7 +25,7 @@ export const Hero = () => {
             </Button>
           </Link>
           <Link to="/blog">
-            <Button size="lg" variant="outline" className="border-2 border-white text-white hover:bg-white hover:text-orange-500 font-semibold px-8 w-full sm:w-auto">
+            <Button size="lg" className="bg-white text-orange-500 hover:bg-gray-100 font-semibold px-8 w-full sm:w-auto">
               <BookOpen className="h-5 w-5 mr-2" />
               Read Stories
             </Button>
