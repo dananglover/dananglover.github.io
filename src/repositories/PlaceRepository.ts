@@ -1,5 +1,12 @@
-import { supabase, TABLES } from '@/lib/supabase';
+import { supabase } from '@/integrations/supabase/client';
 import { Place, PlaceType, Review, CreatePlaceForm, CreateReviewForm, PaginatedResponse } from '@/types';
+
+const TABLES = {
+  PLACES: 'places',
+  PLACE_TYPES: 'place_type',
+  REVIEWS: 'reviews',
+  FAVORITES: 'favorites'
+} as const;
 
 export class PlaceRepository {
   async getPlaces(page = 1, limit = 12, placeTypeId?: string): Promise<PaginatedResponse<Place>> {
@@ -269,4 +276,4 @@ export class PlaceRepository {
   }
 }
 
-export const placeRepository = new PlaceRepository(); 
+export const placeRepository = new PlaceRepository();

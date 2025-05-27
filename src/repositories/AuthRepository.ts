@@ -1,4 +1,5 @@
-import { supabase } from '@/lib/supabase';
+
+import { supabase } from '@/integrations/supabase/client';
 import { User } from '@/types';
 
 export class AuthRepository {
@@ -72,4 +73,4 @@ export class AuthRepository {
   }
 }
 
-export const authRepository = new AuthRepository(); 
+export const authRepository = new AuthRepository();
