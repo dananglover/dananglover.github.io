@@ -1,0 +1,52 @@
+### 🧭 **Cursor Rules for Danang Lover (Vite + React + TypeScript PWA)**
+
+#### 🧱 Architecture Rules
+
+* ✅ Structure code in 3 clearly separated layers:
+
+  * **UI Layer** (`components/`, `pages/`, `widgets/`): Pure presentational React components only
+  * **Service Layer** (`services/`): Handle business logic, use cases, validation
+  * **Repository Layer** (`repositories/`): Encapsulate all Supabase + localStorage access
+* ✅ Never call Supabase directly from UI components — always go through Repository layer
+* ✅ Use Dependency Injection (if feasible) in service layer to keep testable logic
+
+#### 🗃️ Database Rules
+
+* ✅ Table names use **snake\_case** (e.g. `place_type`, `blog_post`)
+* ✅ Field/column names use **camelCase** (e.g. `placeId`, `createdAt`)
+* ✅ Use UUID as primary key unless required otherwise
+* ✅ Wrap all Supabase operations in reusable functions inside `repositories/`
+
+#### 💻 UI/UX & PWA Rules
+
+* ✅ Use responsive design principles (mobile-first where possible)
+* ✅ Implement **PWA features**: web manifest, service worker, and offline support
+* ✅ All images must use Supabase storage URLs or base64 previews
+* ✅ Blog editor should support live **Markdown** preview
+* ✅ Blog viewer pages must render Markdown using `react-markdown` or equivalent
+
+#### 🔐 Auth Rules
+
+* ✅ Use Supabase’s **Google OAuth** only for authentication
+* ✅ All create/edit/delete actions are gated by authentication
+* ✅ Expose login/logout flows through a dedicated `authService`
+
+#### 🔧 Code Quality Rules
+
+* ✅ Use **TypeScript strict mode** (`"strict": true` in tsconfig)
+* ✅ Follow ESLint rules: React + TypeScript + Prettier plugin
+* ✅ Use named exports, avoid default exports unless absolutely necessary
+* ✅ Organize components into folders by feature or domain (not by type)
+* ✅ Use `tsx` only for files with JSX/HTML markup, otherwise use `.ts`
+
+#### 📁 Folder Naming Conventions
+
+* ✅ Folder names in **kebab-case** (`place-detail`, `blog-editor`)
+* ✅ Use **PascalCase** for component files (`PlaceCard.tsx`)
+* ✅ Avoid deeply nested folders — favor feature-modular structure (e.g., `/features/blog/`, `/features/place/`)
+
+#### ✅ Cursor Workflow Suggestions
+
+* Use **inline comments** like `// TODO(cursor):` for future refactor tasks
+* Use `FIXME(cursor):` to mark broken or risky logic
+* Use `NOTE(cursor):` to explain non-obvious architectural decisions

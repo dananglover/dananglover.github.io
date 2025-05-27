@@ -1,111 +1,47 @@
-
 import { BlogPost, CreateBlogPostForm, Comment, CreateCommentForm, PaginatedResponse } from '@/types';
+import { blogRepository } from '@/repositories/BlogRepository';
 
 export class BlogService {
+  constructor(private repository = blogRepository) {}
+
   async getBlogPosts(page = 1, limit = 12): Promise<PaginatedResponse<BlogPost>> {
-    // Mock implementation - replace with actual Supabase calls
-    const mockPosts: BlogPost[] = [
-      {
-        id: '1',
-        title: "My First Month Living in Danang: A Digital Nomad's Perspective",
-        content: `# My First Month Living in Danang
-
-Moving to Danang as a digital nomad has been an incredible journey. Here are my thoughts and experiences...
-
-## The Coffee Culture
-
-The coffee scene here is absolutely amazing. From the traditional Vietnamese coffee served with condensed milk to modern specialty coffee shops...`,
-        excerpt: "From finding the perfect coffee shops for remote work to discovering hidden beaches, here's what I learned during my first month in this incredible city...",
-        images: [],
-        userId: 'user1',
-        published: true,
-        publishedAt: '2024-01-15T10:00:00Z',
-        createdAt: '2024-01-15T10:00:00Z',
-        updatedAt: '2024-01-15T10:00:00Z'
-      }
-    ];
-
-    return {
-      data: mockPosts,
-      pagination: {
-        page,
-        limit,
-        total: mockPosts.length,
-        totalPages: Math.ceil(mockPosts.length / limit)
-      }
-    };
+    return this.repository.getBlogPosts(page, limit);
   }
 
   async getBlogPostById(id: string): Promise<BlogPost | null> {
-    return {
-      id,
-      title: "My First Month Living in Danang: A Digital Nomad's Perspective",
-      content: `# My First Month Living in Danang
-
-Moving to Danang as a digital nomad has been an incredible journey. Here are my thoughts and experiences...
-
-## The Coffee Culture
-
-The coffee scene here is absolutely amazing. From the traditional Vietnamese coffee served with condensed milk to modern specialty coffee shops, there's something for every coffee lover.
-
-### My Favorite Spots
-
-1. **Cong Caphe** - Perfect for people watching
-2. **The Workshop** - Great for remote work
-3. **Heart Coffee Roastery** - Best specialty coffee
-
-## The Beaches
-
-Living near the beach has been one of the biggest perks...`,
-      excerpt: "From finding the perfect coffee shops for remote work to discovering hidden beaches, here's what I learned during my first month in this incredible city...",
-      images: [],
-      userId: 'user1',
-      published: true,
-      publishedAt: '2024-01-15T10:00:00Z',
-      createdAt: '2024-01-15T10:00:00Z',
-      updatedAt: '2024-01-15T10:00:00Z'
-    };
+    return this.repository.getBlogPostById(id);
   }
 
-  async createBlogPost(postData: CreateBlogPostForm): Promise<BlogPost> {
-    console.log('Creating blog post:', postData);
-    
-    const newPost: BlogPost = {
-      id: `post-${Date.now()}`,
-      title: postData.title,
-      content: postData.content,
-      excerpt: postData.content.substring(0, 200) + '...',
-      images: [], // Would be uploaded image URLs
-      userId: 'current-user',
-      published: postData.published,
-      publishedAt: postData.published ? new Date().toISOString() : undefined,
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString()
-    };
+  async createBlogPost(postData: CreateBlogPostForm, userId: string): Promise<BlogPost> {
+    return this.repository.createBlogPost(postData, userId);
+  }
 
-    return newPost;
+  async updateBlogPost(id: string, postData: Partial<CreateBlogPostForm>, userId: string): Promise<BlogPost> {
+    return this.repository.updateBlogPost(id, postData, userId);
+  }
+
+  async deleteBlogPost(id: string, userId: string): Promise<void> {
+    return this.repository.deleteBlogPost(id, userId);
+  }
+
+  async getUserBlogPosts(userId: string): Promise<BlogPost[]> {
+    return this.repository.getUserBlogPosts(userId);
   }
 
   async getBlogComments(blogPostId: string): Promise<Comment[]> {
-    return [];
+    return this.repository.getBlogComments(blogPostId);
   }
 
-  async createComment(blogPostId: string, commentData: CreateCommentForm): Promise<Comment> {
-    console.log('Creating comment for post:', blogPostId, commentData);
-    
-    return {
-      id: `comment-${Date.now()}`,
-      blogPostId,
-      userId: 'current-user',
-      content: commentData.content,
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString()
-    };
+  async createComment(blogPostId: string, commentData: CreateCommentForm, userId: string): Promise<Comment> {
+    return this.repository.createComment(blogPostId, commentData, userId);
+  }
+
+  async deleteComment(id: string, userId: string): Promise<void> {
+    return this.repository.deleteComment(id, userId);
   }
 
   generateExcerpt(content: string, maxLength = 200): string {
-    const textOnly = content.replace(/[#*`]/g, '').trim();
-    return textOnly.length > maxLength ? textOnly.substring(0, maxLength) + '...' : textOnly;
+    return this.repository.generateExcerpt(content, maxLength);
   }
 }
 
