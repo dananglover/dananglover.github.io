@@ -2,6 +2,7 @@
 import React from 'react';
 import { Button } from '@/components/ui/button';
 import { MapPin, BookOpen, Star } from 'lucide-react';
+import { Link } from 'react-router-dom';
 
 export const Hero = () => {
   return (
@@ -18,14 +19,18 @@ export const Hero = () => {
         </p>
         
         <div className="flex flex-col sm:flex-row gap-4 justify-center items-center mb-12">
-          <Button size="lg" className="bg-white text-orange-500 hover:bg-gray-100 font-semibold px-8">
-            <MapPin className="h-5 w-5 mr-2" />
-            Explore Places
-          </Button>
-          <Button size="lg" variant="outline" className="border-white text-white hover:bg-white hover:text-orange-500 font-semibold px-8">
-            <BookOpen className="h-5 w-5 mr-2" />
-            Read Stories
-          </Button>
+          <Link to="/places">
+            <Button size="lg" className="bg-white text-orange-500 hover:bg-gray-100 font-semibold px-8 w-full sm:w-auto">
+              <MapPin className="h-5 w-5 mr-2" />
+              Explore Places
+            </Button>
+          </Link>
+          <Link to="/blog">
+            <Button size="lg" variant="outline" className="border-2 border-white text-white hover:bg-white hover:text-orange-500 font-semibold px-8 w-full sm:w-auto">
+              <BookOpen className="h-5 w-5 mr-2" />
+              Read Stories
+            </Button>
+          </Link>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-4xl mx-auto">
