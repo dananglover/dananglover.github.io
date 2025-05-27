@@ -1,10 +1,14 @@
 import { supabase } from '@/integrations/supabase/client';
+import { Database } from '@/integrations/supabase/types';
 import { BlogPost, Comment, CreateBlogPostForm, CreateCommentForm, PaginatedResponse } from '@/types';
 
-const TABLES = {
-  BLOG_POSTS: 'blog_posts',
-  COMMENTS: 'comments'
-} as const;
+type Tables = Database['public']['Tables'];
+type BlogPostRow = Tables['blog_posts']['Row'];
+type BlogPostInsert = Tables['blog_posts']['Insert'];
+type BlogPostUpdate = Tables['blog_posts']['Update'];
+type CommentRow = Tables['comments']['Row'];
+type CommentInsert = Tables['comments']['Insert'];
+type CommentUpdate = Tables['comments']['Update'];
 
 export class BlogRepository {
   async getBlogPosts(page = 1, limit = 12): Promise<PaginatedResponse<BlogPost>> {
@@ -12,8 +16,8 @@ export class BlogRepository {
     const to = from + limit - 1;
 
     const { data, error, count } = await supabase
-      .from(TABLES.BLOG_POSTS)
-      .select(`
+      .from('blog_posts')
+      .select<'blog_posts', BlogPostRow>(`
         *,
         user:users(*)
       `, { count: 'exact' })
@@ -36,53 +40,33 @@ export class BlogRepository {
 
   async getBlogPostById(id: string): Promise<BlogPost | null> {
     const { data, error } = await supabase
-      .from(TABLES.BLOG_POSTS)
-      .select(`
+      .from('blog_posts')
+      .select<'blog_posts', BlogPostRow>(`
         *,
         user:users(*)
       `)
       .eq('id', id)
       .single();
 
-    if (error && error.code !== 'PGRST116') throw error;
+    if (error) throw error;
     return data;
   }
 
   async createBlogPost(postData: CreateBlogPostForm, userId: string): Promise<BlogPost> {
-    // Upload images to Supabase Storage
-    const imageUrls: string[] = [];
-    
-    for (const image of postData.images) {
-      const fileName = `${Date.now()}-${image.name}`;
-      const { data: uploadData, error: uploadError } = await supabase.storage
-        .from('blog-images')
-        .upload(fileName, image);
-
-      if (uploadError) throw uploadError;
-
-      const { data: { publicUrl } } = supabase.storage
-        .from('blog-images')
-        .getPublicUrl(fileName);
-
-      imageUrls.push(publicUrl);
-    }
-
-    const excerpt = this.generateExcerpt(postData.content);
-
     const { data, error } = await supabase
-      .from(TABLES.BLOG_POSTS)
-      .insert({
+      .from('blog_posts')
+      .insert<BlogPostInsert>({
         title: postData.title,
         content: postData.content,
-        excerpt,
-        images: imageUrls,
+        excerpt: postData.excerpt,
+        images: postData.images,
         userId,
         published: postData.published,
         publishedAt: postData.published ? new Date().toISOString() : null,
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString()
       })
-      .select(`
+      .select<'blog_posts', BlogPostRow>(`
         *,
         user:users(*)
       `)
@@ -92,50 +76,17 @@ export class BlogRepository {
     return data;
   }
 
-  async updateBlogPost(id: string, postData: Partial<CreateBlogPostForm>, userId: string): Promise<BlogPost> {
-    const updateData: any = {
-      ...postData,
-      updatedAt: new Date().toISOString()
-    };
-
-    // Handle image uploads if provided
-    if (postData.images && postData.images.length > 0) {
-      const imageUrls: string[] = [];
-      
-      for (const image of postData.images) {
-        const fileName = `${Date.now()}-${image.name}`;
-        const { data: uploadData, error: uploadError } = await supabase.storage
-          .from('blog-images')
-          .upload(fileName, image);
-
-        if (uploadError) throw uploadError;
-
-        const { data: { publicUrl } } = supabase.storage
-          .from('blog-images')
-          .getPublicUrl(fileName);
-
-        imageUrls.push(publicUrl);
-      }
-      
-      updateData.images = imageUrls;
-    }
-
-    // Update excerpt if content is being updated
-    if (postData.content) {
-      updateData.excerpt = this.generateExcerpt(postData.content);
-    }
-
-    // Set publishedAt if publishing for the first time
-    if (postData.published) {
-      updateData.publishedAt = new Date().toISOString();
-    }
-
+  async updateBlogPost(id: string, updateData: Partial<CreateBlogPostForm>, userId: string): Promise<BlogPost> {
     const { data, error } = await supabase
-      .from(TABLES.BLOG_POSTS)
-      .update(updateData)
+      .from('blog_posts')
+      .update<BlogPostUpdate>({
+        ...updateData,
+        publishedAt: updateData.published ? new Date().toISOString() : null,
+        updatedAt: new Date().toISOString()
+      })
       .eq('id', id)
-      .eq('userId', userId) // Ensure user can only update their own posts
-      .select(`
+      .eq('userId', userId)
+      .select<'blog_posts', BlogPostRow>(`
         *,
         user:users(*)
       `)
@@ -147,18 +98,18 @@ export class BlogRepository {
 
   async deleteBlogPost(id: string, userId: string): Promise<void> {
     const { error } = await supabase
-      .from(TABLES.BLOG_POSTS)
+      .from('blog_posts')
       .delete()
       .eq('id', id)
-      .eq('userId', userId); // Ensure user can only delete their own posts
+      .eq('userId', userId);
 
     if (error) throw error;
   }
 
   async getUserBlogPosts(userId: string): Promise<BlogPost[]> {
     const { data, error } = await supabase
-      .from(TABLES.BLOG_POSTS)
-      .select(`
+      .from('blog_posts')
+      .select<'blog_posts', BlogPostRow>(`
         *,
         user:users(*)
       `)
@@ -171,8 +122,8 @@ export class BlogRepository {
 
   async getBlogComments(blogPostId: string): Promise<Comment[]> {
     const { data, error } = await supabase
-      .from(TABLES.COMMENTS)
-      .select(`
+      .from('comments')
+      .select<'comments', CommentRow>(`
         *,
         user:users(*)
       `)
@@ -185,15 +136,15 @@ export class BlogRepository {
 
   async createComment(blogPostId: string, commentData: CreateCommentForm, userId: string): Promise<Comment> {
     const { data, error } = await supabase
-      .from(TABLES.COMMENTS)
-      .insert({
+      .from('comments')
+      .insert<CommentInsert>({
         blogPostId,
-        userId,
         content: commentData.content,
+        userId,
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString()
       })
-      .select(`
+      .select<'comments', CommentRow>(`
         *,
         user:users(*)
       `)
@@ -205,10 +156,10 @@ export class BlogRepository {
 
   async deleteComment(id: string, userId: string): Promise<void> {
     const { error } = await supabase
-      .from(TABLES.COMMENTS)
+      .from('comments')
       .delete()
       .eq('id', id)
-      .eq('userId', userId); // Ensure user can only delete their own comments
+      .eq('userId', userId);
 
     if (error) throw error;
   }
