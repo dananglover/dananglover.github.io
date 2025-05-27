@@ -108,7 +108,15 @@ const CreateBlogPost = () => {
                       required
                     />
                     <div className="border rounded-lg p-4 bg-white overflow-auto min-h-[400px] prose prose-sm max-w-none">
-                      <ReactMarkdown remarkPlugins={[remarkGfm]}>
+                      <ReactMarkdown 
+                        remarkPlugins={[remarkGfm]}
+                        components={{
+                          p: ({ children }) => <p className="mb-4 text-gray-700 leading-relaxed whitespace-pre-wrap">{children}</p>,
+                          pre: ({ children }) => <pre className="bg-gray-100 p-4 rounded-lg overflow-x-auto mb-4 whitespace-pre-wrap">{children}</pre>,
+                          br: () => <br />,
+                        }}
+                        skipHtml={false}
+                      >
                         {formData.content || '*Preview will appear here*'}
                       </ReactMarkdown>
                     </div>
