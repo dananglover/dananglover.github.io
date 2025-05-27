@@ -103,7 +103,8 @@ export interface CreatePlaceForm {
 export interface CreateBlogPostForm {
   title: string;
   content: string;
-  images: File[];
+  excerpt?: string;
+  images: string[];
   published: boolean;
 }
 

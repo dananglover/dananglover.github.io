@@ -1,0 +1,166 @@
+import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { useAuth } from '@/contexts/AuthContext';
+import { Navigation } from '@/components/layout/Navigation';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Textarea } from '@/components/ui/textarea';
+import { Label } from '@/components/ui/label';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Switch } from '@/components/ui/switch';
+import { toast } from 'sonner';
+import { blogService } from '@/services/BlogService';
+import { ArrowLeft } from 'lucide-react';
+import { Link } from 'react-router-dom';
+import ReactMarkdown from 'react-markdown';
+import remarkGfm from 'remark-gfm';
+
+const CreateBlogPost = () => {
+  const navigate = useNavigate();
+  const { user } = useAuth();
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [formData, setFormData] = useState({
+    title: '',
+    content: '',
+    excerpt: '',
+    published: false,
+    images: [] as string[]
+  });
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    if (!user) {
+      toast.error('Please sign in to create a blog post');
+      return;
+    }
+
+    try {
+      setIsSubmitting(true);
+      console.log('Creating blog post:', {
+        title: formData.title,
+        contentLength: formData.content.length,
+        published: formData.published,
+        userId: user.id
+      });
+
+      const post = await blogService.createBlogPost({
+        ...formData,
+        excerpt: formData.excerpt || blogService.generateExcerpt(formData.content)
+      }, user.id);
+
+      toast.success('Blog post created successfully!');
+      navigate(`/blog/${post.id}`);
+    } catch (error) {
+      console.error('Error creating blog post:', error);
+      toast.error(error instanceof Error ? error.message : 'Failed to create blog post');
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const handleContentChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+    const content = e.target.value;
+    setFormData(prev => ({
+      ...prev,
+      content,
+      excerpt: prev.excerpt || blogService.generateExcerpt(content)
+    }));
+  };
+
+  return (
+    <div className="min-h-screen bg-gradient-to-br from-orange-50 to-teal-50">
+      <Navigation />
+      
+      <div className="container mx-auto px-4 py-8">
+        <div className="max-w-4xl mx-auto">
+          <Link to="/blog" className="inline-flex items-center text-orange-600 hover:text-orange-700 mb-8">
+            <ArrowLeft className="h-4 w-4 mr-2" />
+            Back to Blog
+          </Link>
+
+          <Card>
+            <CardHeader>
+              <CardTitle>Write a New Post</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <form onSubmit={handleSubmit} className="space-y-6">
+                <div className="space-y-2">
+                  <Label htmlFor="title">Title</Label>
+                  <Input
+                    id="title"
+                    value={formData.title}
+                    onChange={(e) => setFormData(prev => ({ ...prev, title: e.target.value }))}
+                    placeholder="Enter your post title"
+                    required
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="content">Content (Markdown supported)</Label>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <Textarea
+                      id="content"
+                      value={formData.content}
+                      onChange={handleContentChange}
+                      placeholder="Write your post content here..."
+                      className="min-h-[400px] font-mono"
+                      required
+                    />
+                    <div className="border rounded-lg p-4 bg-white overflow-auto min-h-[400px] prose prose-sm max-w-none">
+                      <ReactMarkdown remarkPlugins={[remarkGfm]}>
+                        {formData.content || '*Preview will appear here*'}
+                      </ReactMarkdown>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="excerpt">Excerpt (optional)</Label>
+                  <Textarea
+                    id="excerpt"
+                    value={formData.excerpt}
+                    onChange={(e) => setFormData(prev => ({ ...prev, excerpt: e.target.value }))}
+                    placeholder="A brief summary of your post"
+                    className="h-24"
+                  />
+                  <p className="text-sm text-gray-500">
+                    If left empty, an excerpt will be automatically generated from your content.
+                  </p>
+                </div>
+
+                <div className="flex items-center space-x-2">
+                  <Switch
+                    id="published"
+                    checked={formData.published}
+                    onCheckedChange={(checked) => setFormData(prev => ({ ...prev, published: checked }))}
+                  />
+                  <Label htmlFor="published">Publish immediately</Label>
+                </div>
+
+                <div className="flex justify-end space-x-4">
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={() => navigate('/blog')}
+                  >
+                    Cancel
+                  </Button>
+                  <Button
+                    type="submit"
+                    disabled={isSubmitting}
+                    className="bg-orange-500 hover:bg-orange-600"
+                  >
+                    {isSubmitting ? 'Creating...' : 'Create Post'}
+                  </Button>
+                </div>
+              </form>
+            </CardContent>
+          </Card>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+export default CreateBlogPost; 

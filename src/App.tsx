@@ -10,6 +10,7 @@ import PlaceDetail from "./pages/PlaceDetail";
 import CreatePlace from "./pages/CreatePlace";
 import Blog from "./pages/Blog";
 import BlogDetail from "./pages/BlogDetail";
+import CreateBlogPost from "./pages/CreateBlogPost";
 import NotFound from "./pages/NotFound";
 import AuthCallback from "./pages/AuthCallback";
 
@@ -28,6 +29,7 @@ const App = () => (
             <Route path="/places/create" element={<CreatePlace />} />
             <Route path="/places/:id" element={<PlaceDetail />} />
             <Route path="/blog" element={<Blog />} />
+            <Route path="/blog/create" element={<CreateBlogPost />} />
             <Route path="/blog/:id" element={<BlogDetail />} />
             <Route path="/auth/callback" element={<AuthCallback />} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
