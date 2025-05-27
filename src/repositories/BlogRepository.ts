@@ -1,5 +1,10 @@
-import { supabase, TABLES } from '@/lib/supabase';
+import { supabase } from '@/integrations/supabase/client';
 import { BlogPost, Comment, CreateBlogPostForm, CreateCommentForm, PaginatedResponse } from '@/types';
+
+const TABLES = {
+  BLOG_POSTS: 'blog_posts',
+  COMMENTS: 'comments'
+} as const;
 
 export class BlogRepository {
   async getBlogPosts(page = 1, limit = 12): Promise<PaginatedResponse<BlogPost>> {
@@ -224,4 +229,4 @@ export class BlogRepository {
   }
 }
 
-export const blogRepository = new BlogRepository(); 
+export const blogRepository = new BlogRepository();
