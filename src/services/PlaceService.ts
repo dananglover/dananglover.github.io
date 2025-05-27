@@ -1,103 +1,47 @@
-
-import { Place, CreatePlaceForm, Review, CreateReviewForm, PaginatedResponse } from '@/types';
+import { Place, CreatePlaceForm, Review, CreateReviewForm, PaginatedResponse, PlaceType } from '@/types';
+import { placeRepository } from '@/repositories/PlaceRepository';
 
 export class PlaceService {
-  async getPlaces(page = 1, limit = 12, placeTypeId?: string): Promise<PaginatedResponse<Place>> {
-    // Mock implementation - replace with actual Supabase calls
-    const mockPlaces: Place[] = [
-      {
-        id: '1',
-        name: 'Cong Caphe Dragon Bridge',
-        description: 'Iconic Vietnamese coffee chain with a view of the famous Dragon Bridge',
-        price: '50,000-80,000 VND',
-        photos: ['https://images.unsplash.com/photo-1559056199-641a0ac8b55e?w=400&h=300&fit=crop'],
-        placeTypeId: 'coffee-shop',
-        location: 'Dragon Bridge, Danang',
-        rating: 4.5,
-        reviewsCount: 23,
-        userId: 'user1',
-        createdAt: '2024-01-15T10:00:00Z',
-        updatedAt: '2024-01-15T10:00:00Z'
-      }
-    ];
+  constructor(private repository = placeRepository) {}
 
-    return {
-      data: mockPlaces,
-      pagination: {
-        page,
-        limit,
-        total: mockPlaces.length,
-        totalPages: Math.ceil(mockPlaces.length / limit)
-      }
-    };
+  async getPlaces(page = 1, limit = 12, placeTypeId?: string): Promise<PaginatedResponse<Place>> {
+    return this.repository.getPlaces(page, limit, placeTypeId);
   }
 
   async getPlaceById(id: string): Promise<Place | null> {
-    // Mock implementation
-    return {
-      id,
-      name: 'Cong Caphe Dragon Bridge',
-      description: 'Iconic Vietnamese coffee chain with a view of the famous Dragon Bridge',
-      price: '50,000-80,000 VND',
-      photos: ['https://images.unsplash.com/photo-1559056199-641a0ac8b55e?w=400&h=300&fit=crop'],
-      placeTypeId: 'coffee-shop',
-      location: 'Dragon Bridge, Danang',
-      rating: 4.5,
-      reviewsCount: 23,
-      userId: 'user1',
-      createdAt: '2024-01-15T10:00:00Z',
-      updatedAt: '2024-01-15T10:00:00Z'
-    };
+    return this.repository.getPlaceById(id);
   }
 
-  async createPlace(placeData: CreatePlaceForm): Promise<Place> {
-    // Mock implementation - in real app, this would upload images and create place in Supabase
-    console.log('Creating place:', placeData);
-    
-    const newPlace: Place = {
-      id: `place-${Date.now()}`,
-      name: placeData.name,
-      description: placeData.description,
-      price: placeData.price,
-      photos: [], // Would be uploaded image URLs
-      placeTypeId: placeData.placeTypeId,
-      location: placeData.location,
-      rating: 0,
-      reviewsCount: 0,
-      userId: 'current-user', // Would get from auth context
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString()
-    };
+  async createPlace(placeData: CreatePlaceForm, userId: string): Promise<Place> {
+    return this.repository.createPlace(placeData, userId);
+  }
 
-    return newPlace;
+  async updatePlace(id: string, placeData: Partial<CreatePlaceForm>, userId: string): Promise<Place> {
+    return this.repository.updatePlace(id, placeData, userId);
+  }
+
+  async deletePlace(id: string, userId: string): Promise<void> {
+    return this.repository.deletePlace(id, userId);
   }
 
   async getPlaceReviews(placeId: string): Promise<Review[]> {
-    // Mock implementation
-    return [];
+    return this.repository.getPlaceReviews(placeId);
   }
 
-  async createReview(placeId: string, reviewData: CreateReviewForm): Promise<Review> {
-    console.log('Creating review for place:', placeId, reviewData);
-    
-    return {
-      id: `review-${Date.now()}`,
-      placeId,
-      userId: 'current-user',
-      rating: reviewData.rating,
-      content: reviewData.content,
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString()
-    };
+  async createReview(placeId: string, reviewData: CreateReviewForm, userId: string): Promise<Review> {
+    return this.repository.createReview(placeId, reviewData, userId);
   }
 
-  async toggleFavorite(placeId: string): Promise<boolean> {
-    console.log('Toggling favorite for place:', placeId);
-    return true; // Return new favorite status
+  async toggleFavorite(placeId: string, userId: string): Promise<boolean> {
+    return this.repository.toggleFavorite(placeId, userId);
   }
 
-  async getFavorites(): Promise<Place[]> {
-    return [];
+  async getFavorites(userId: string): Promise<Place[]> {
+    return this.repository.getFavorites(userId);
+  }
+
+  async getPlaceTypes(): Promise<PlaceType[]> {
+    return this.repository.getPlaceTypes();
   }
 }
 
