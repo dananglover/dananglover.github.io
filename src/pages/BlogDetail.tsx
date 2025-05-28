@@ -11,10 +11,11 @@ import { Calendar, User, ArrowLeft } from 'lucide-react';
 import { blogService } from '@/services/BlogService';
 import { Link } from 'react-router-dom';
 import { format } from 'date-fns';
+import { CommentSection } from '@/components/blog/CommentSection';
 
 const BlogDetail = () => {
   const { id } = useParams<{ id: string }>();
-  
+
   const { data: post, isLoading, error } = useQuery({
     queryKey: ['blog-post', id],
     queryFn: () => blogService.getBlogPostById(id!),
@@ -63,7 +64,7 @@ const BlogDetail = () => {
   return (
     <div className="min-h-screen bg-gradient-to-br from-orange-50 to-teal-50">
       <Navigation />
-      
+
       <div className="container mx-auto px-4 py-8">
         <div className="max-w-4xl mx-auto">
           <Link to="/blog" className="inline-flex items-center text-orange-600 hover:text-orange-700 mb-8">
@@ -74,22 +75,22 @@ const BlogDetail = () => {
           <article>
             <header className="mb-8">
               <h1 className="text-4xl font-bold text-gray-900 mb-4">{post.title}</h1>
-              
+
               <div className="flex items-center space-x-4 text-gray-600">
                 <div className="flex items-center">
                   <Avatar className="h-8 w-8 mr-2">
-                    <AvatarImage src={post.user?.avatar} />
+                    <AvatarImage src={post.user?.avatar || undefined} />
                     <AvatarFallback>
                       {post.user?.name?.[0]?.toUpperCase() || 'A'}
                     </AvatarFallback>
                   </Avatar>
                   <span>{post.user?.name || 'Anonymous'}</span>
                 </div>
-                
+
                 <div className="flex items-center">
                   <Calendar className="h-4 w-4 mr-1" />
                   <span>
-                    {post.publishedAt 
+                    {post.publishedAt
                       ? format(new Date(post.publishedAt), 'MMMM d, yyyy')
                       : 'Draft'
                     }
@@ -124,10 +125,10 @@ const BlogDetail = () => {
                     pre: ({ children }) => <pre className="bg-gray-100 p-4 rounded-lg overflow-x-auto mb-4 whitespace-pre-wrap">{children}</pre>,
                     blockquote: ({ children }) => <blockquote className="border-l-4 border-orange-500 pl-4 italic text-gray-600 mb-4">{children}</blockquote>,
                     a: ({ href, children }) => (
-                      <a 
-                        href={typeof href === 'string' ? href : '#'} 
-                        className="text-orange-600 hover:text-orange-700 underline" 
-                        target="_blank" 
+                      <a
+                        href={typeof href === 'string' ? href : '#'}
+                        className="text-orange-600 hover:text-orange-700 underline"
+                        target="_blank"
                         rel="noopener noreferrer"
                       >
                         {children}
@@ -141,6 +142,10 @@ const BlogDetail = () => {
                 </ReactMarkdown>
               </CardContent>
             </Card>
+
+            <div className="mt-12">
+              <CommentSection blogPostId={post.id} />
+            </div>
           </article>
         </div>
       </div>

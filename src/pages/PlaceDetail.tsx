@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { useParams } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
@@ -9,10 +8,11 @@ import { Badge } from '@/components/ui/badge';
 import { MapPin, Star, Heart, ArrowLeft, DollarSign } from 'lucide-react';
 import { placeService } from '@/services/PlaceService';
 import { Link } from 'react-router-dom';
+import { ReviewSection } from '@/components/places/ReviewSection';
 
 const PlaceDetail = () => {
   const { id } = useParams<{ id: string }>();
-  
+
   const { data: place, isLoading, error } = useQuery({
     queryKey: ['place', id],
     queryFn: () => placeService.getPlaceById(id!),
@@ -61,7 +61,7 @@ const PlaceDetail = () => {
   return (
     <div className="min-h-screen bg-gradient-to-br from-orange-50 to-teal-50">
       <Navigation />
-      
+
       <div className="container mx-auto px-4 py-8">
         <div className="max-w-4xl mx-auto">
           <Link to="/places" className="inline-flex items-center text-orange-600 hover:text-orange-700 mb-8">
@@ -77,15 +77,15 @@ const PlaceDetail = () => {
                   alt={place.name}
                   className="w-full rounded-lg object-cover h-64 lg:h-96"
                 />
-                <Button 
-                  size="sm" 
+                <Button
+                  size="sm"
                   variant="secondary"
                   className="absolute top-4 right-4 bg-white/90 hover:bg-white"
                 >
                   <Heart className="h-4 w-4" />
                 </Button>
               </div>
-              
+
               {place.photos && place.photos.length > 1 && (
                 <div className="grid grid-cols-3 gap-2">
                   {place.photos.slice(1, 4).map((photo, index) => (
@@ -113,7 +113,7 @@ const PlaceDetail = () => {
               </div>
 
               <h1 className="text-3xl font-bold text-gray-900 mb-4">{place.name}</h1>
-              
+
               <div className="flex items-center text-gray-600 mb-4">
                 <MapPin className="h-5 w-5 mr-2" />
                 <span>{place.location}</span>
@@ -131,6 +131,10 @@ const PlaceDetail = () => {
                 </CardContent>
               </Card>
             </div>
+          </div>
+
+          <div className="mt-12">
+            <ReviewSection placeId={place.id} />
           </div>
         </div>
       </div>
