@@ -1,18 +1,55 @@
-
-import React from 'react';
-import { useQuery } from '@tanstack/react-query';
-import { Card, CardContent, CardFooter } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { MapPin, Star, Heart, DollarSign } from 'lucide-react';
-import { Link } from 'react-router-dom';
+import { Card, CardContent, CardFooter } from '@/components/ui/card';
 import { placeService } from '@/services/PlaceService';
+import { useQuery } from '@tanstack/react-query';
+import { DollarSign, Heart, MapPin, Star } from 'lucide-react';
+import { Link } from 'react-router-dom';
+import { toast } from 'sonner';
 
 export const FeaturedPlaces = () => {
-  const { data: placesData, isLoading } = useQuery({
+  const { data: placesData, isLoading, error } = useQuery({
     queryKey: ['featured-places'],
-    queryFn: () => placeService.getPlaces(1, 3)
+    queryFn: async () => {
+      try {
+        console.log('Fetching featured places...');
+        const response = await placeService.getPlaces(1, 3);
+        console.log('Featured places response:', {
+          data: response.data,
+          pagination: response.pagination,
+          total: response.pagination.total,
+          totalPages: response.pagination.totalPages
+        });
+        if (response.data.length === 0) {
+          console.log('No featured places found in the database');
+        }
+        return response;
+      } catch (err) {
+        console.error('Error fetching featured places:', err);
+        toast.error('Failed to load featured places');
+        throw err;
+      }
+    }
   });
+
+  if (error) {
+    console.error('Featured places error:', error);
+    return (
+      <section>
+        <div className="text-center mb-12">
+          <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
+            Featured Places
+          </h2>
+          <p className="text-xl text-gray-600 max-w-2xl mx-auto">
+            Discover the most loved spots by our community of Danang enthusiasts
+          </p>
+        </div>
+        <div className="text-center text-red-500">
+          Failed to load featured places. Please try again later.
+        </div>
+      </section>
+    );
+  }
 
   if (isLoading) {
     return (
@@ -25,7 +62,7 @@ export const FeaturedPlaces = () => {
             Discover the most loved spots by our community of Danang enthusiasts
           </p>
         </div>
-        
+
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
           {Array.from({ length: 3 }).map((_, index) => (
             <div key={index} className="animate-pulse">
@@ -54,30 +91,30 @@ export const FeaturedPlaces = () => {
         {places.map((place) => (
           <Card key={place.id} className="overflow-hidden hover:shadow-lg transition-shadow duration-300">
             <div className="relative">
-              <img 
-                src={place.photos?.[0] || "https://images.unsplash.com/photo-1559056199-641a0ac8b55e?w=400&h=300&fit=crop"} 
+              <img
+                src={place.photos?.[0] || "https://images.unsplash.com/photo-1559056199-641a0ac8b55e?w=400&h=300&fit=crop"}
                 alt={place.name}
                 className="w-full h-48 object-cover"
               />
-              <Button 
-                size="sm" 
+              <Button
+                size="sm"
                 variant="secondary"
                 className="absolute top-3 right-3 bg-white/90 hover:bg-white"
               >
                 <Heart className="h-4 w-4" />
               </Button>
-              <Badge 
-                variant="secondary" 
+              <Badge
+                variant="secondary"
                 className="absolute top-3 left-3 bg-orange-500 text-white hover:bg-orange-600"
               >
                 {place.placeType?.name || 'Place'}
               </Badge>
             </div>
-            
+
             <CardContent className="p-6">
               <h3 className="text-xl font-semibold text-gray-900 mb-2">{place.name}</h3>
               <p className="text-gray-600 mb-4">{place.description}</p>
-              
+
               <div className="flex items-center space-x-4 text-sm text-gray-500 mb-4">
                 <div className="flex items-center">
                   <MapPin className="h-4 w-4 mr-1" />
@@ -88,13 +125,13 @@ export const FeaturedPlaces = () => {
                   {place.rating}
                 </div>
               </div>
-              
+
               <div className="flex items-center space-x-2 mb-4">
                 <DollarSign className="h-4 w-4 text-green-600" />
                 <span className="text-green-600 font-medium">{place.price}</span>
               </div>
             </CardContent>
-            
+
             <CardFooter className="px-6 pb-6">
               <Link to={`/places/${place.id}`} className="w-full">
                 <Button className="w-full bg-gradient-to-r from-orange-500 to-teal-500 hover:from-orange-600 hover:to-teal-600 text-white">
