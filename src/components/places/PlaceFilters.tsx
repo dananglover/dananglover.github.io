@@ -1,7 +1,6 @@
-import React from 'react';
-import { PlaceType } from '@/types';
 import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
+import { PlaceType } from '@/types';
+import React from 'react';
 
 interface PlaceFiltersProps {
   placeTypes: PlaceType[];

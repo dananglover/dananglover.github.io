@@ -1,9 +1,8 @@
 
-import React from 'react';
-import { Navigation } from '@/components/layout/Navigation';
-import { Hero } from '@/components/home/Hero';
 import { FeaturedPlaces } from '@/components/home/FeaturedPlaces';
+import { Hero } from '@/components/home/Hero';
 import { RecentBlogs } from '@/components/home/RecentBlogs';
+import { Navigation } from '@/components/layout/Navigation';
 
 const Index = () => {
   return (

@@ -1,20 +1,20 @@
 
-import React, { useState } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
-import { useQuery } from '@tanstack/react-query';
-import { useAuth } from '@/contexts/AuthContext';
 import { Navigation } from '@/components/layout/Navigation';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Textarea } from '@/components/ui/textarea';
-import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
-import { toast } from 'sonner';
+import { Textarea } from '@/components/ui/textarea';
+import { useAuth } from '@/contexts/AuthContext';
 import { blogService } from '@/services/BlogService';
+import { useQuery } from '@tanstack/react-query';
 import { ArrowLeft } from 'lucide-react';
+import React, { useState } from 'react';
 import ReactMarkdown from 'react-markdown';
+import { useNavigate, useParams } from 'react-router-dom';
 import remarkGfm from 'remark-gfm';
+import { toast } from 'sonner';
 
 const EditBlogPost = () => {
   const { id } = useParams<{ id: string }>();

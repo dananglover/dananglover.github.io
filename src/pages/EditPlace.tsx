@@ -1,17 +1,17 @@
 
-import React, { useState } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
-import { useQuery } from '@tanstack/react-query';
 import { Navigation } from '@/components/layout/Navigation';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Textarea } from '@/components/ui/textarea';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { ArrowLeft, Upload } from 'lucide-react';
-import { placeService } from '@/services/PlaceService';
-import { useAuth } from '@/contexts/AuthContext';
+import { Input } from '@/components/ui/input';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/components/ui/use-toast';
+import { useAuth } from '@/contexts/AuthContext';
+import { placeService } from '@/services/PlaceService';
+import { useQuery } from '@tanstack/react-query';
+import { ArrowLeft, Upload } from 'lucide-react';
+import React, { useState } from 'react';
+import { useNavigate, useParams } from 'react-router-dom';
 
 const EditPlace = () => {
   const { id } = useParams<{ id: string }>();

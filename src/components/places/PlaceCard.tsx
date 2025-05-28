@@ -1,8 +1,8 @@
-import React from 'react';
-import { Place } from '@/types';
-import { Card, CardContent, CardFooter } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Star, MapPin, DollarSign } from 'lucide-react';
+import { Card, CardContent, CardFooter } from '@/components/ui/card';
+import { Place } from '@/types';
+import { DollarSign, MapPin, Star } from 'lucide-react';
+import React from 'react';
 import { Link } from 'react-router-dom';
 
 interface PlaceCardProps {

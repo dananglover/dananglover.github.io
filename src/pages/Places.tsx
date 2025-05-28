@@ -1,12 +1,12 @@
-import React, { useState, useEffect } from 'react';
-import { useQuery } from '@tanstack/react-query';
 import { Navigation } from '@/components/layout/Navigation';
 import { PlaceCard } from '@/components/places/PlaceCard';
 import { PlaceFilters } from '@/components/places/PlaceFilters';
 import { Button } from '@/components/ui/button';
-import { Plus } from 'lucide-react';
-import { placeService } from '@/services/PlaceService';
 import { useAuth } from '@/contexts/AuthContext';
+import { placeService } from '@/services/PlaceService';
+import { useQuery } from '@tanstack/react-query';
+import { Plus } from 'lucide-react';
+import { useState } from 'react';
 import { Link } from 'react-router-dom';
 
 const Places = () => {

@@ -1,7 +1,7 @@
-import React, { useState } from 'react';
-import { Heart, Menu, X, MapPin, BookOpen, User, LogOut, Lock } from 'lucide-react';
-import { Button } from '@/components/ui/button';
+import { AuthModal } from '@/components/auth/AuthModal';
+import { ChangePasswordModal } from '@/components/auth/ChangePasswordModal';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { Button } from '@/components/ui/button';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -9,10 +9,10 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import { Link, useLocation } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
-import { AuthModal } from '@/components/auth/AuthModal';
-import { ChangePasswordModal } from '@/components/auth/ChangePasswordModal';
+import { BookOpen, Heart, Lock, LogOut, MapPin, Menu, User, X } from 'lucide-react';
+import { useState } from 'react';
+import { Link, useLocation } from 'react-router-dom';
 
 export const Navigation = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
