@@ -51,6 +51,9 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
           if (mounted) {
             setUser(currentUser);
           }
+        } else {
+          // No session found - user is not authenticated, but that's OK
+          console.log('No session found - user not authenticated');
         }
       } catch (error) {
         console.error('Error initializing auth:', error);
