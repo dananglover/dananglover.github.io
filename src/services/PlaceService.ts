@@ -1,3 +1,4 @@
+
 import { Place, CreatePlaceForm, Review, CreateReviewForm, PaginatedResponse, PlaceType } from '@/types';
 import { placeRepository } from '@/repositories/PlaceRepository';
 
@@ -61,6 +62,10 @@ export class PlaceService {
 
   async createReview(placeId: string, reviewData: CreateReviewForm, userId: string): Promise<Review> {
     return this.repository.createReview(placeId, reviewData, userId);
+  }
+
+  async deleteReview(id: string, userId: string): Promise<void> {
+    return this.repository.deleteReview(id, userId);
   }
 
   async toggleFavorite(placeId: string, userId: string): Promise<boolean> {

@@ -4,11 +4,6 @@ import { Database } from '@/integrations/supabase/types';
 import { BlogPost, Comment, CreateBlogPostForm, CreateCommentForm, PaginatedResponse } from '@/types';
 
 type Tables = Database['public']['Tables'];
-type BlogPostRow = Tables['blog_posts']['Row'];
-type BlogPostInsert = Tables['blog_posts']['Insert'];
-type BlogPostUpdate = Tables['blog_posts']['Update'];
-type CommentRow = Tables['comments']['Row'];
-type CommentInsert = Tables['comments']['Insert'];
 
 export class BlogRepository {
   async getBlogPosts(page = 1, limit = 12): Promise<PaginatedResponse<BlogPost>> {
@@ -30,7 +25,8 @@ export class BlogRepository {
     const blogPosts: BlogPost[] = (data || []).map(post => ({
       ...post,
       images: post.images || [],
-      user: post.user || null
+      userId: post.userId || '',
+      user: post.user || undefined
     }));
 
     return {
@@ -60,7 +56,8 @@ export class BlogRepository {
     return {
       ...data,
       images: data.images || [],
-      user: data.user || null
+      userId: data.userId || '',
+      user: data.user || undefined
     };
   }
 
@@ -89,7 +86,8 @@ export class BlogRepository {
     return {
       ...data,
       images: data.images || [],
-      user: data.user || null
+      userId: data.userId || '',
+      user: data.user || undefined
     };
   }
 
@@ -114,7 +112,8 @@ export class BlogRepository {
     return {
       ...data,
       images: data.images || [],
-      user: data.user || null
+      userId: data.userId || '',
+      user: data.user || undefined
     };
   }
 
@@ -143,7 +142,8 @@ export class BlogRepository {
     return (data || []).map(post => ({
       ...post,
       images: post.images || [],
-      user: post.user || null
+      userId: post.userId || '',
+      user: post.user || undefined
     }));
   }
 
@@ -162,7 +162,8 @@ export class BlogRepository {
     return (data || []).map(comment => ({
       ...comment,
       blogPostId: comment.blogPostId || '',
-      user: comment.user || null
+      userId: comment.userId || '',
+      user: comment.user || undefined
     }));
   }
 
@@ -187,7 +188,8 @@ export class BlogRepository {
     return {
       ...data,
       blogPostId: data.blogPostId || '',
-      user: data.user || null
+      userId: data.userId || '',
+      user: data.user || undefined
     };
   }
 

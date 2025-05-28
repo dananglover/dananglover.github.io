@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useAuth } from '@/contexts/AuthContext';
@@ -8,7 +9,19 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { format } from 'date-fns';
 import { toast } from 'sonner';
 import { blogService } from '@/services/BlogService';
-import { Comment, CreateCommentForm } from '@/types';
+import { CreateCommentForm } from '@/types';
+import { Trash2 } from 'lucide-react';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from '@/components/ui/alert-dialog';
 
 interface CommentSectionProps {
     blogPostId: string;
@@ -32,8 +45,20 @@ export const CommentSection: React.FC<CommentSectionProps> = ({ blogPostId }) =>
             setNewComment('');
             toast.success('Comment posted successfully!');
         },
-        onError: (error) => {
+        onError: () => {
             toast.error('Failed to post comment. Please try again.');
+        }
+    });
+
+    const deleteCommentMutation = useMutation({
+        mutationFn: (commentId: string) =>
+            blogService.deleteComment(commentId, user!.id),
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ['blog-comments', blogPostId] });
+            toast.success('Comment deleted successfully!');
+        },
+        onError: () => {
+            toast.error('Failed to delete comment. Please try again.');
         }
     });
 
@@ -48,6 +73,10 @@ export const CommentSection: React.FC<CommentSectionProps> = ({ blogPostId }) =>
             return;
         }
         createCommentMutation.mutate({ content: newComment });
+    };
+
+    const handleDeleteComment = (commentId: string) => {
+        deleteCommentMutation.mutate(commentId);
     };
 
     return (
@@ -103,9 +132,41 @@ export const CommentSection: React.FC<CommentSectionProps> = ({ blogPostId }) =>
                                     <div className="flex-1">
                                         <div className="flex items-center justify-between">
                                             <p className="font-medium">{comment.user?.name || 'Anonymous'}</p>
-                                            <span className="text-sm text-gray-500">
-                                                {format(new Date(comment.createdAt), 'MMM d, yyyy')}
-                                            </span>
+                                            <div className="flex items-center space-x-2">
+                                                <span className="text-sm text-gray-500">
+                                                    {format(new Date(comment.createdAt), 'MMM d, yyyy')}
+                                                </span>
+                                                {user && comment.userId === user.id && (
+                                                    <AlertDialog>
+                                                        <AlertDialogTrigger asChild>
+                                                            <Button
+                                                                variant="ghost"
+                                                                size="sm"
+                                                                className="text-red-600 hover:text-red-700 hover:bg-red-50"
+                                                            >
+                                                                <Trash2 className="h-4 w-4" />
+                                                            </Button>
+                                                        </AlertDialogTrigger>
+                                                        <AlertDialogContent>
+                                                            <AlertDialogHeader>
+                                                                <AlertDialogTitle>Delete Comment</AlertDialogTitle>
+                                                                <AlertDialogDescription>
+                                                                    Are you sure you want to delete this comment? This action cannot be undone.
+                                                                </AlertDialogDescription>
+                                                            </AlertDialogHeader>
+                                                            <AlertDialogFooter>
+                                                                <AlertDialogCancel>Cancel</AlertDialogCancel>
+                                                                <AlertDialogAction
+                                                                    onClick={() => handleDeleteComment(comment.id)}
+                                                                    className="bg-red-600 hover:bg-red-700"
+                                                                >
+                                                                    Delete
+                                                                </AlertDialogAction>
+                                                            </AlertDialogFooter>
+                                                        </AlertDialogContent>
+                                                    </AlertDialog>
+                                                )}
+                                            </div>
                                         </div>
                                         <p className="mt-2 text-gray-700 whitespace-pre-wrap">{comment.content}</p>
                                     </div>
@@ -119,4 +180,4 @@ export const CommentSection: React.FC<CommentSectionProps> = ({ blogPostId }) =>
             </div>
         </div>
     );
-}; 
+};

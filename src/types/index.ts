@@ -1,3 +1,4 @@
+
 // Core entity types
 export type User = {
   id: string;
@@ -25,7 +26,7 @@ export interface Place {
   location: string;
   rating: number;
   reviewsCount: number;
-  userId: string;
+  userId: string | null;
   user?: User;
   createdAt: string;
   updatedAt: string;
@@ -34,7 +35,7 @@ export interface Place {
 export interface Review {
   id: string;
   placeId: string;
-  userId: string;
+  userId: string | null;
   user?: User;
   rating: number;
   content: string;
@@ -55,7 +56,7 @@ export interface BlogPost {
   content: string;
   excerpt: string;
   images: string[];
-  userId: string;
+  userId: string | null;
   user?: User;
   published: boolean;
   publishedAt?: string;
@@ -66,7 +67,7 @@ export interface BlogPost {
 export interface Comment {
   id: string;
   blogPostId: string;
-  userId: string;
+  userId: string | null;
   user?: User;
   content: string;
   createdAt: string;
