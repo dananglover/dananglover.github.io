@@ -1,10 +1,9 @@
-import React from 'react';
-import { BlogPost } from '@/types';
 import { Card, CardContent, CardFooter } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
-import { Calendar, User } from 'lucide-react';
-import { Link } from 'react-router-dom';
+import { BlogPost } from '@/types';
 import { format } from 'date-fns';
+import { Calendar, User } from 'lucide-react';
+import React from 'react';
+import { Link } from 'react-router-dom';
 
 interface BlogPostCardProps {
   post: BlogPost;

@@ -1,6 +1,6 @@
 
-import { User } from '@/types';
 import { authRepository } from '@/repositories/AuthRepository';
+import { User } from '@/types';
 
 export class AuthService {
   constructor(private repository = authRepository) {}

@@ -1,6 +1,5 @@
-import React from 'react';
 import { Button } from '@/components/ui/button';
-import { MapPin, BookOpen, Star } from 'lucide-react';
+import { BookOpen, MapPin, Star } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
 export const Hero = () => {

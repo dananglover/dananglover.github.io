@@ -1,16 +1,14 @@
 
-import { useParams, useNavigate } from 'react-router-dom';
-import { useQuery } from '@tanstack/react-query';
 import { Navigation } from '@/components/layout/Navigation';
+import { ReviewSection } from '@/components/places/ReviewSection';
+import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
-import { MapPin, Star, Heart, ArrowLeft, DollarSign } from 'lucide-react';
-import { Edit } from 'lucide-react';
-import { placeService } from '@/services/PlaceService';
-import { Link } from 'react-router-dom';
-import { ReviewSection } from '@/components/places/ReviewSection';
 import { useAuth } from '@/contexts/AuthContext';
+import { placeService } from '@/services/PlaceService';
+import { useQuery } from '@tanstack/react-query';
+import { ArrowLeft, DollarSign, Edit, Heart, MapPin, Star } from 'lucide-react';
+import { Link, useNavigate, useParams } from 'react-router-dom';
 
 const PlaceDetail = () => {
   const { id } = useParams<{ id: string }>();

@@ -1,6 +1,6 @@
 
-import { Place, CreatePlaceForm, Review, CreateReviewForm, PaginatedResponse, PlaceType } from '@/types';
 import { placeRepository } from '@/repositories/PlaceRepository';
+import { CreatePlaceForm, CreateReviewForm, PaginatedResponse, Place, PlaceType, Review } from '@/types';
 
 export class PlaceService {
   constructor(private repository = placeRepository) {}

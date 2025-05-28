@@ -1,5 +1,5 @@
-import { BlogPost, CreateBlogPostForm, Comment, CreateCommentForm, PaginatedResponse } from '@/types';
 import { blogRepository } from '@/repositories/BlogRepository';
+import { BlogPost, Comment, CreateBlogPostForm, CreateCommentForm, PaginatedResponse } from '@/types';
 
 export class BlogService {
   constructor(private repository = blogRepository) {}

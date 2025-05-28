@@ -1,19 +1,17 @@
 
-import { useParams, useNavigate } from 'react-router-dom';
-import { useQuery } from '@tanstack/react-query';
-import ReactMarkdown from 'react-markdown';
-import remarkGfm from 'remark-gfm';
+import { CommentSection } from '@/components/blog/CommentSection';
 import { Navigation } from '@/components/layout/Navigation';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { Calendar, ArrowLeft } from 'lucide-react';
-import { Edit } from 'lucide-react';
-import { blogService } from '@/services/BlogService';
-import { Link } from 'react-router-dom';
-import { format } from 'date-fns';
-import { CommentSection } from '@/components/blog/CommentSection';
 import { useAuth } from '@/contexts/AuthContext';
+import { blogService } from '@/services/BlogService';
+import { useQuery } from '@tanstack/react-query';
+import { format } from 'date-fns';
+import { ArrowLeft, Calendar, Edit } from 'lucide-react';
+import ReactMarkdown from 'react-markdown';
+import { Link, useNavigate, useParams } from 'react-router-dom';
+import remarkGfm from 'remark-gfm';
 
 const BlogDetail = () => {
   const { id } = useParams<{ id: string }>();

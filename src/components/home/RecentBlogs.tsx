@@ -1,12 +1,10 @@
-import React from 'react';
-import { useQuery } from '@tanstack/react-query';
-import { Card, CardContent, CardFooter } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { User, Calendar, MessageCircle, ArrowRight } from 'lucide-react';
-import { Link } from 'react-router-dom';
+import { Card, CardContent, CardFooter } from '@/components/ui/card';
 import { blogService } from '@/services/BlogService';
+import { useQuery } from '@tanstack/react-query';
 import { format } from 'date-fns';
+import { ArrowRight, Calendar } from 'lucide-react';
+import { Link } from 'react-router-dom';
 import { toast } from 'sonner';
 
 export const RecentBlogs = () => {
