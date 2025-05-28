@@ -1,3 +1,4 @@
+
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -8,9 +9,11 @@ import Index from "./pages/Index";
 import Places from "./pages/Places";
 import PlaceDetail from "./pages/PlaceDetail";
 import CreatePlace from "./pages/CreatePlace";
+import EditPlace from "./pages/EditPlace";
 import Blog from "./pages/Blog";
 import BlogDetail from "./pages/BlogDetail";
 import CreateBlogPost from "./pages/CreateBlogPost";
+import EditBlogPost from "./pages/EditBlogPost";
 import NotFound from "./pages/NotFound";
 import AuthCallback from "./pages/AuthCallback";
 import ResetPassword from "./pages/ResetPassword";
@@ -29,9 +32,11 @@ const App = () => (
             <Route path="/places" element={<Places />} />
             <Route path="/places/create" element={<CreatePlace />} />
             <Route path="/places/:id" element={<PlaceDetail />} />
+            <Route path="/places/:id/edit" element={<EditPlace />} />
             <Route path="/blog" element={<Blog />} />
             <Route path="/blog/create" element={<CreateBlogPost />} />
             <Route path="/blog/:id" element={<BlogDetail />} />
+            <Route path="/blog/:id/edit" element={<EditBlogPost />} />
             <Route path="/auth/callback" element={<AuthCallback />} />
             <Route path="/auth/reset-password" element={<ResetPassword />} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}

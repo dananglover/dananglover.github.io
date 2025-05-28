@@ -59,7 +59,7 @@ export interface BlogPost {
   userId: string | null;
   user?: User;
   published: boolean;
-  publishedAt?: string;
+  publishedAt?: string | null;
   createdAt: string;
   updatedAt: string;
 }
