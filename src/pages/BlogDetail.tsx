@@ -1,5 +1,5 @@
-import React from 'react';
-import { useParams } from 'react-router-dom';
+
+import { useParams, useNavigate } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
@@ -7,20 +7,28 @@ import { Navigation } from '@/components/layout/Navigation';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { Calendar, User, ArrowLeft } from 'lucide-react';
+import { Calendar, ArrowLeft } from 'lucide-react';
+import { Edit } from 'lucide-react';
 import { blogService } from '@/services/BlogService';
 import { Link } from 'react-router-dom';
 import { format } from 'date-fns';
 import { CommentSection } from '@/components/blog/CommentSection';
+import { useAuth } from '@/contexts/AuthContext';
 
 const BlogDetail = () => {
   const { id } = useParams<{ id: string }>();
+  const { user } = useAuth();
+  const navigate = useNavigate();
 
   const { data: post, isLoading, error } = useQuery({
     queryKey: ['blog-post', id],
     queryFn: () => blogService.getBlogPostById(id!),
     enabled: !!id
   });
+
+  const handleEditPost = () => {
+    navigate(`/blog/${id}/edit`);
+  };
 
   if (isLoading) {
     return (
@@ -61,16 +69,31 @@ const BlogDetail = () => {
     );
   }
 
+  const isOwner = user && post.userId === user.id;
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-orange-50 to-teal-50">
       <Navigation />
 
       <div className="container mx-auto px-4 py-8">
         <div className="max-w-4xl mx-auto">
-          <Link to="/blog" className="inline-flex items-center text-orange-600 hover:text-orange-700 mb-8">
-            <ArrowLeft className="h-4 w-4 mr-2" />
-            Back to Blog
-          </Link>
+          <div className="flex justify-between items-center mb-8">
+            <Link to="/blog" className="inline-flex items-center text-orange-600 hover:text-orange-700">
+              <ArrowLeft className="h-4 w-4 mr-2" />
+              Back to Blog
+            </Link>
+            
+            {isOwner && (
+              <Button
+                onClick={handleEditPost}
+                variant="outline"
+                className="bg-white hover:bg-gray-50"
+              >
+                <Edit className="h-4 w-4 mr-2" />
+                Edit Post
+              </Button>
+            )}
+          </div>
 
           <article>
             <header className="mb-8">
@@ -153,4 +176,4 @@ const BlogDetail = () => {
   );
 };
 
-export default BlogDetail; 
+export default BlogDetail;

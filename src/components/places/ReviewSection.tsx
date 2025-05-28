@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useAuth } from '@/contexts/AuthContext';
@@ -6,10 +7,22 @@ import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Star, StarHalf } from 'lucide-react';
+import { Trash2 } from 'lucide-react';
 import { format } from 'date-fns';
 import { toast } from 'sonner';
 import { placeService } from '@/services/PlaceService';
-import { Review, CreateReviewForm } from '@/types';
+import { CreateReviewForm } from '@/types';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from '@/components/ui/alert-dialog';
 
 interface ReviewSectionProps {
     placeId: string;
@@ -37,8 +50,21 @@ export const ReviewSection: React.FC<ReviewSectionProps> = ({ placeId }) => {
             setNewReview({ content: '', rating: 5 });
             toast.success('Review posted successfully!');
         },
-        onError: (error) => {
+        onError: () => {
             toast.error('Failed to post review. Please try again.');
+        }
+    });
+
+    const deleteReviewMutation = useMutation({
+        mutationFn: (reviewId: string) =>
+            placeService.deleteReview(reviewId, user!.id),
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ['place-reviews', placeId] });
+            queryClient.invalidateQueries({ queryKey: ['place', placeId] });
+            toast.success('Review deleted successfully!');
+        },
+        onError: () => {
+            toast.error('Failed to delete review. Please try again.');
         }
     });
 
@@ -53,6 +79,10 @@ export const ReviewSection: React.FC<ReviewSectionProps> = ({ placeId }) => {
             return;
         }
         createReviewMutation.mutate(newReview);
+    };
+
+    const handleDeleteReview = (reviewId: string) => {
+        deleteReviewMutation.mutate(reviewId);
     };
 
     const renderStars = (rating: number) => {
@@ -149,9 +179,41 @@ export const ReviewSection: React.FC<ReviewSectionProps> = ({ placeId }) => {
                                                     {renderStars(review.rating)}
                                                 </div>
                                             </div>
-                                            <span className="text-sm text-gray-500">
-                                                {format(new Date(review.createdAt), 'MMM d, yyyy')}
-                                            </span>
+                                            <div className="flex items-center space-x-2">
+                                                <span className="text-sm text-gray-500">
+                                                    {format(new Date(review.createdAt), 'MMM d, yyyy')}
+                                                </span>
+                                                {user && review.userId === user.id && (
+                                                    <AlertDialog>
+                                                        <AlertDialogTrigger asChild>
+                                                            <Button
+                                                                variant="ghost"
+                                                                size="sm"
+                                                                className="text-red-600 hover:text-red-700 hover:bg-red-50"
+                                                            >
+                                                                <Trash2 className="h-4 w-4" />
+                                                            </Button>
+                                                        </AlertDialogTrigger>
+                                                        <AlertDialogContent>
+                                                            <AlertDialogHeader>
+                                                                <AlertDialogTitle>Delete Review</AlertDialogTitle>
+                                                                <AlertDialogDescription>
+                                                                    Are you sure you want to delete this review? This action cannot be undone.
+                                                                </AlertDialogDescription>
+                                                            </AlertDialogHeader>
+                                                            <AlertDialogFooter>
+                                                                <AlertDialogCancel>Cancel</AlertDialogCancel>
+                                                                <AlertDialogAction
+                                                                    onClick={() => handleDeleteReview(review.id)}
+                                                                    className="bg-red-600 hover:bg-red-700"
+                                                                >
+                                                                    Delete
+                                                                </AlertDialogAction>
+                                                            </AlertDialogFooter>
+                                                        </AlertDialogContent>
+                                                    </AlertDialog>
+                                                )}
+                                            </div>
                                         </div>
                                         <p className="mt-2 text-gray-700 whitespace-pre-wrap">{review.content}</p>
                                     </div>
@@ -165,4 +227,4 @@ export const ReviewSection: React.FC<ReviewSectionProps> = ({ placeId }) => {
             </div>
         </div>
     );
-}; 
+};

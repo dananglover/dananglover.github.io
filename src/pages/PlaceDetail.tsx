@@ -1,23 +1,31 @@
-import React from 'react';
-import { useParams } from 'react-router-dom';
+
+import { useParams, useNavigate } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { Navigation } from '@/components/layout/Navigation';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { MapPin, Star, Heart, ArrowLeft, DollarSign } from 'lucide-react';
+import { Edit } from 'lucide-react';
 import { placeService } from '@/services/PlaceService';
 import { Link } from 'react-router-dom';
 import { ReviewSection } from '@/components/places/ReviewSection';
+import { useAuth } from '@/contexts/AuthContext';
 
 const PlaceDetail = () => {
   const { id } = useParams<{ id: string }>();
+  const { user } = useAuth();
+  const navigate = useNavigate();
 
   const { data: place, isLoading, error } = useQuery({
     queryKey: ['place', id],
     queryFn: () => placeService.getPlaceById(id!),
     enabled: !!id
   });
+
+  const handleEditPlace = () => {
+    navigate(`/places/${id}/edit`);
+  };
 
   if (isLoading) {
     return (
@@ -58,16 +66,31 @@ const PlaceDetail = () => {
     );
   }
 
+  const isOwner = user && place.userId === user.id;
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-orange-50 to-teal-50">
       <Navigation />
 
       <div className="container mx-auto px-4 py-8">
         <div className="max-w-4xl mx-auto">
-          <Link to="/places" className="inline-flex items-center text-orange-600 hover:text-orange-700 mb-8">
-            <ArrowLeft className="h-4 w-4 mr-2" />
-            Back to Places
-          </Link>
+          <div className="flex justify-between items-center mb-8">
+            <Link to="/places" className="inline-flex items-center text-orange-600 hover:text-orange-700">
+              <ArrowLeft className="h-4 w-4 mr-2" />
+              Back to Places
+            </Link>
+            
+            {isOwner && (
+              <Button
+                onClick={handleEditPlace}
+                variant="outline"
+                className="bg-white hover:bg-gray-50"
+              >
+                <Edit className="h-4 w-4 mr-2" />
+                Edit Place
+              </Button>
+            )}
+          </div>
 
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
             <div>

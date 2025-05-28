@@ -1,17 +1,10 @@
+
 import { supabase } from '@/integrations/supabase/client';
 import { Database } from '@/integrations/supabase/types';
 import { Place, PlaceType, Review, CreatePlaceForm, CreateReviewForm, PaginatedResponse } from '@/types';
 
 type Tables = Database['public']['Tables'];
-type PlacesRow = Tables['places']['Row'];
 type PlacesInsert = Tables['places']['Insert'];
-type PlacesUpdate = Tables['places']['Update'];
-type ReviewsRow = Tables['reviews']['Row'];
-type ReviewsInsert = Tables['reviews']['Insert'];
-type ReviewsUpdate = Tables['reviews']['Update'];
-type FavoritesRow = Tables['favorites']['Row'];
-type FavoritesInsert = Tables['favorites']['Insert'];
-type PlaceTypeRow = Tables['place_type']['Row'];
 
 export class PlaceRepository {
   async getPlaces(page = 1, limit = 12, placeTypeId?: string): Promise<PaginatedResponse<Place>> {
@@ -38,8 +31,9 @@ export class PlaceRepository {
     const places: Place[] = (data || []).map(place => ({
       ...place,
       photos: place.photos || [],
-      placeType: place.placeType || null,
-      user: place.user || null
+      userId: place.userId || '',
+      placeType: place.placeType || undefined,
+      user: place.user || undefined
     }));
 
     return {
@@ -70,8 +64,9 @@ export class PlaceRepository {
     return {
       ...data,
       photos: data.photos || [],
-      placeType: data.placeType || null,
-      user: data.user || null
+      userId: data.userId || '',
+      placeType: data.placeType || undefined,
+      user: data.user || undefined
     };
   }
 
@@ -120,7 +115,13 @@ export class PlaceRepository {
       .single();
 
     if (error) throw error;
-    return data;
+    return {
+      ...data,
+      photos: data.photos || [],
+      userId: data.userId || '',
+      placeType: data.placeType || undefined,
+      user: data.user || undefined
+    };
   }
 
   async updatePlace(id: string, updateData: Partial<CreatePlaceForm>, userId: string): Promise<Place> {
@@ -144,8 +145,9 @@ export class PlaceRepository {
     return {
       ...data,
       photos: data.photos || [],
-      placeType: data.placeType || null,
-      user: data.user || null
+      userId: data.userId || '',
+      placeType: data.placeType || undefined,
+      user: data.user || undefined
     };
   }
 
@@ -173,7 +175,8 @@ export class PlaceRepository {
 
     return (data || []).map(review => ({
       ...review,
-      user: review.user || null
+      userId: review.userId || '',
+      user: review.user || undefined
     }));
   }
 
@@ -201,8 +204,32 @@ export class PlaceRepository {
 
     return {
       ...data,
-      user: data.user || null
+      userId: data.userId || '',
+      user: data.user || undefined
     };
+  }
+
+  async deleteReview(id: string, userId: string): Promise<void> {
+    // Get the place ID before deleting the review to update rating
+    const { data: review } = await supabase
+      .from('reviews')
+      .select('placeId')
+      .eq('id', id)
+      .eq('userId', userId)
+      .single();
+
+    const { error } = await supabase
+      .from('reviews')
+      .delete()
+      .eq('id', id)
+      .eq('userId', userId);
+
+    if (error) throw error;
+
+    // Update place rating after deletion
+    if (review) {
+      await this.updatePlaceRating(review.placeId);
+    }
   }
 
   async toggleFavorite(placeId: string, userId: string): Promise<boolean> {
@@ -256,8 +283,9 @@ export class PlaceRepository {
     return (data?.map(favorite => ({
       ...favorite.place,
       photos: favorite.place.photos || [],
-      placeType: favorite.place.placeType || null,
-      user: favorite.place.user || null
+      userId: favorite.place.userId || '',
+      placeType: favorite.place.placeType || undefined,
+      user: favorite.place.user || undefined
     })) || []) as Place[];
   }
 
