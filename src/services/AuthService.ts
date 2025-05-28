@@ -1,3 +1,4 @@
+
 import { User } from '@/types';
 import { authRepository } from '@/repositories/AuthRepository';
 
@@ -29,7 +30,7 @@ export class AuthService {
   }
 
   async restoreSession() {
-    return this.repository.restoreSession();
+    return this.repository.getSession();
   }
 
   async getCurrentUser(): Promise<User | null> {
@@ -41,4 +42,4 @@ export class AuthService {
   }
 }
 
-export const authService = new AuthService(); 
+export const authService = new AuthService();
