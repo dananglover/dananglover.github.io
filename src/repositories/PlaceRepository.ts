@@ -11,16 +11,13 @@ type ReviewsInsert = Tables['reviews']['Insert'];
 type ReviewsUpdate = Tables['reviews']['Update'];
 type FavoritesRow = Tables['favorites']['Row'];
 type FavoritesInsert = Tables['favorites']['Insert'];
-type FavoritesUpdate = Tables['favorites']['Update'];
 type PlaceTypeRow = Tables['place_type']['Row'];
-type PlaceTypeInsert = Tables['place_type']['Insert'];
-type PlaceTypeUpdate = Tables['place_type']['Update'];
 
 export class PlaceRepository {
   async getPlaces(page = 1, limit = 12, placeTypeId?: string): Promise<PaginatedResponse<Place>> {
     let query = supabase
       .from('places')
-      .select<'places', PlacesRow>(`
+      .select(`
         *,
         placeType:place_type(*),
         user:users(*)
@@ -38,8 +35,15 @@ export class PlaceRepository {
 
     if (error) throw error;
 
+    const places: Place[] = (data || []).map(place => ({
+      ...place,
+      photos: place.photos || [],
+      placeType: place.placeType || null,
+      user: place.user || null
+    }));
+
     return {
-      data: data || [],
+      data: places,
       pagination: {
         page,
         limit,
@@ -52,7 +56,7 @@ export class PlaceRepository {
   async getPlaceById(id: string): Promise<Place | null> {
     const { data, error } = await supabase
       .from('places')
-      .select<'places', PlacesRow>(`
+      .select(`
         *,
         placeType:place_type(*),
         user:users(*)
@@ -61,7 +65,14 @@ export class PlaceRepository {
       .single();
 
     if (error) throw error;
-    return data;
+    if (!data) return null;
+
+    return {
+      ...data,
+      photos: data.photos || [],
+      placeType: data.placeType || null,
+      user: data.user || null
+    };
   }
 
   async createPlace(placeData: CreatePlaceForm, userId: string): Promise<Place> {
@@ -101,7 +112,7 @@ export class PlaceRepository {
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString()
       })
-      .select<'places', PlacesRow>(`
+      .select(`
         *,
         placeType:place_type(*),
         user:users(*)
@@ -115,13 +126,13 @@ export class PlaceRepository {
   async updatePlace(id: string, updateData: Partial<CreatePlaceForm>, userId: string): Promise<Place> {
     const { data, error } = await supabase
       .from('places')
-      .update<PlacesUpdate>({
+      .update({
         ...updateData,
         updatedAt: new Date().toISOString()
       })
       .eq('id', id)
       .eq('userId', userId)
-      .select<'places', PlacesRow>(`
+      .select(`
         *,
         placeType:place_type(*),
         user:users(*)
@@ -129,7 +140,13 @@ export class PlaceRepository {
       .single();
 
     if (error) throw error;
-    return data;
+
+    return {
+      ...data,
+      photos: data.photos || [],
+      placeType: data.placeType || null,
+      user: data.user || null
+    };
   }
 
   async deletePlace(id: string, userId: string): Promise<void> {
@@ -145,7 +162,7 @@ export class PlaceRepository {
   async getPlaceReviews(placeId: string): Promise<Review[]> {
     const { data, error } = await supabase
       .from('reviews')
-      .select<'reviews', ReviewsRow>(`
+      .select(`
         *,
         user:users(*)
       `)
@@ -153,13 +170,17 @@ export class PlaceRepository {
       .order('createdAt', { ascending: false });
 
     if (error) throw error;
-    return data || [];
+
+    return (data || []).map(review => ({
+      ...review,
+      user: review.user || null
+    }));
   }
 
   async createReview(placeId: string, reviewData: CreateReviewForm, userId: string): Promise<Review> {
     const { data, error } = await supabase
       .from('reviews')
-      .insert<ReviewsInsert>({
+      .insert({
         placeId,
         content: reviewData.content,
         rating: reviewData.rating,
@@ -167,7 +188,7 @@ export class PlaceRepository {
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString()
       })
-      .select<'reviews', ReviewsRow>(`
+      .select(`
         *,
         user:users(*)
       `)
@@ -178,14 +199,17 @@ export class PlaceRepository {
     // Update place rating
     await this.updatePlaceRating(placeId);
 
-    return data;
+    return {
+      ...data,
+      user: data.user || null
+    };
   }
 
   async toggleFavorite(placeId: string, userId: string): Promise<boolean> {
     // Check if favorite exists
     const { data: existingFavorite } = await supabase
       .from('favorites')
-      .select<'favorites', FavoritesRow>('id')
+      .select('id')
       .eq('placeId', placeId)
       .eq('userId', userId)
       .single();
@@ -204,7 +228,7 @@ export class PlaceRepository {
       // Add favorite
       const { error } = await supabase
         .from('favorites')
-        .insert<FavoritesInsert>({
+        .insert({
           placeId,
           userId,
           createdAt: new Date().toISOString()
@@ -218,7 +242,7 @@ export class PlaceRepository {
   async getFavorites(userId: string): Promise<Place[]> {
     const { data, error } = await supabase
       .from('favorites')
-      .select<'favorites', FavoritesRow>(`
+      .select(`
         place:places(
           *,
           placeType:place_type(*),
@@ -229,13 +253,18 @@ export class PlaceRepository {
       .order('createdAt', { ascending: false });
 
     if (error) throw error;
-    return data?.map(favorite => favorite.place) || [];
+    return (data?.map(favorite => ({
+      ...favorite.place,
+      photos: favorite.place.photos || [],
+      placeType: favorite.place.placeType || null,
+      user: favorite.place.user || null
+    })) || []) as Place[];
   }
 
   async getPlaceTypes(): Promise<PlaceType[]> {
     const { data, error } = await supabase
       .from('place_type')
-      .select<'place_type', PlaceTypeRow>('*')
+      .select('*')
       .order('name');
 
     if (error) throw error;
@@ -246,7 +275,7 @@ export class PlaceRepository {
     // Calculate average rating and count
     const { data: reviews } = await supabase
       .from('reviews')
-      .select<'reviews', ReviewsRow>('rating')
+      .select('rating')
       .eq('placeId', placeId);
 
     if (reviews && reviews.length > 0) {
@@ -255,7 +284,7 @@ export class PlaceRepository {
 
       await supabase
         .from('places')
-        .update<PlacesUpdate>({
+        .update({
           rating: Math.round(average * 10) / 10, // Round to 1 decimal place
           reviewsCount: reviews.length,
           updatedAt: new Date().toISOString()

@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
@@ -17,7 +18,7 @@ import remarkGfm from 'remark-gfm';
 
 const CreateBlogPost = () => {
   const navigate = useNavigate();
-  const { user } = useAuth();
+  const { user, loading } = useAuth();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [formData, setFormData] = useState({
     title: '',
@@ -27,13 +28,56 @@ const CreateBlogPost = () => {
     images: [] as string[]
   });
 
+  // Show loading while checking auth status
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-orange-50 to-teal-50">
+        <Navigation />
+        <div className="container mx-auto px-4 py-8">
+          <div className="max-w-4xl mx-auto text-center">
+            <div className="animate-pulse">
+              <div className="h-8 bg-gray-200 rounded mb-4"></div>
+              <div className="h-64 bg-gray-200 rounded"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // Redirect to sign in if not authenticated
+  if (!user) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-orange-50 to-teal-50">
+        <Navigation />
+        <div className="container mx-auto px-4 py-8">
+          <div className="max-w-4xl mx-auto">
+            <Link to="/blog" className="inline-flex items-center text-orange-600 hover:text-orange-700 mb-8">
+              <ArrowLeft className="h-4 w-4 mr-2" />
+              Back to Blog
+            </Link>
+
+            <Card>
+              <CardHeader>
+                <CardTitle>Sign In Required</CardTitle>
+              </CardHeader>
+              <CardContent className="text-center">
+                <p className="text-gray-600 mb-6">
+                  You need to sign in to write a blog post and share your story with our community.
+                </p>
+                <Button onClick={() => navigate('/blog')} className="bg-orange-500 hover:bg-orange-600">
+                  Go Back to Blog
+                </Button>
+              </CardContent>
+            </Card>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
-    if (!user) {
-      toast.error('Please sign in to create a blog post');
-      return;
-    }
 
     try {
       setIsSubmitting(true);
@@ -171,4 +215,4 @@ const CreateBlogPost = () => {
   );
 };
 
-export default CreateBlogPost; 
+export default CreateBlogPost;

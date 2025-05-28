@@ -1,3 +1,4 @@
+
 import { supabase } from '@/integrations/supabase/client';
 import { Database } from '@/integrations/supabase/types';
 import { BlogPost, Comment, CreateBlogPostForm, CreateCommentForm, PaginatedResponse } from '@/types';
@@ -8,7 +9,6 @@ type BlogPostInsert = Tables['blog_posts']['Insert'];
 type BlogPostUpdate = Tables['blog_posts']['Update'];
 type CommentRow = Tables['comments']['Row'];
 type CommentInsert = Tables['comments']['Insert'];
-type CommentUpdate = Tables['comments']['Update'];
 
 export class BlogRepository {
   async getBlogPosts(page = 1, limit = 12): Promise<PaginatedResponse<BlogPost>> {
@@ -17,7 +17,7 @@ export class BlogRepository {
 
     const { data, error, count } = await supabase
       .from('blog_posts')
-      .select<'blog_posts', BlogPostRow>(`
+      .select(`
         *,
         user:users(*)
       `, { count: 'exact' })
@@ -27,8 +27,14 @@ export class BlogRepository {
 
     if (error) throw error;
 
+    const blogPosts: BlogPost[] = (data || []).map(post => ({
+      ...post,
+      images: post.images || [],
+      user: post.user || null
+    }));
+
     return {
-      data: data || [],
+      data: blogPosts,
       pagination: {
         page,
         limit,
@@ -41,7 +47,7 @@ export class BlogRepository {
   async getBlogPostById(id: string): Promise<BlogPost | null> {
     const { data, error } = await supabase
       .from('blog_posts')
-      .select<'blog_posts', BlogPostRow>(`
+      .select(`
         *,
         user:users(*)
       `)
@@ -49,13 +55,19 @@ export class BlogRepository {
       .single();
 
     if (error) throw error;
-    return data;
+    if (!data) return null;
+
+    return {
+      ...data,
+      images: data.images || [],
+      user: data.user || null
+    };
   }
 
   async createBlogPost(postData: CreateBlogPostForm, userId: string): Promise<BlogPost> {
     const { data, error } = await supabase
       .from('blog_posts')
-      .insert<BlogPostInsert>({
+      .insert({
         title: postData.title,
         content: postData.content,
         excerpt: postData.excerpt,
@@ -66,34 +78,44 @@ export class BlogRepository {
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString()
       })
-      .select<'blog_posts', BlogPostRow>(`
+      .select(`
         *,
         user:users(*)
       `)
       .single();
 
     if (error) throw error;
-    return data;
+
+    return {
+      ...data,
+      images: data.images || [],
+      user: data.user || null
+    };
   }
 
   async updateBlogPost(id: string, updateData: Partial<CreateBlogPostForm>, userId: string): Promise<BlogPost> {
     const { data, error } = await supabase
       .from('blog_posts')
-      .update<BlogPostUpdate>({
+      .update({
         ...updateData,
         publishedAt: updateData.published ? new Date().toISOString() : null,
         updatedAt: new Date().toISOString()
       })
       .eq('id', id)
       .eq('userId', userId)
-      .select<'blog_posts', BlogPostRow>(`
+      .select(`
         *,
         user:users(*)
       `)
       .single();
 
     if (error) throw error;
-    return data;
+
+    return {
+      ...data,
+      images: data.images || [],
+      user: data.user || null
+    };
   }
 
   async deleteBlogPost(id: string, userId: string): Promise<void> {
@@ -109,7 +131,7 @@ export class BlogRepository {
   async getUserBlogPosts(userId: string): Promise<BlogPost[]> {
     const { data, error } = await supabase
       .from('blog_posts')
-      .select<'blog_posts', BlogPostRow>(`
+      .select(`
         *,
         user:users(*)
       `)
@@ -117,13 +139,18 @@ export class BlogRepository {
       .order('createdAt', { ascending: false });
 
     if (error) throw error;
-    return data || [];
+
+    return (data || []).map(post => ({
+      ...post,
+      images: post.images || [],
+      user: post.user || null
+    }));
   }
 
   async getBlogComments(blogPostId: string): Promise<Comment[]> {
     const { data, error } = await supabase
       .from('comments')
-      .select<'comments', CommentRow>(`
+      .select(`
         *,
         user:users(*)
       `)
@@ -131,27 +158,37 @@ export class BlogRepository {
       .order('createdAt', { ascending: false });
 
     if (error) throw error;
-    return data || [];
+
+    return (data || []).map(comment => ({
+      ...comment,
+      blogPostId: comment.blogPostId || '',
+      user: comment.user || null
+    }));
   }
 
   async createComment(blogPostId: string, commentData: CreateCommentForm, userId: string): Promise<Comment> {
     const { data, error } = await supabase
       .from('comments')
-      .insert<CommentInsert>({
+      .insert({
         blogPostId,
         content: commentData.content,
         userId,
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString()
       })
-      .select<'comments', CommentRow>(`
+      .select(`
         *,
         user:users(*)
       `)
       .single();
 
     if (error) throw error;
-    return data;
+
+    return {
+      ...data,
+      blogPostId: data.blogPostId || '',
+      user: data.user || null
+    };
   }
 
   async deleteComment(id: string, userId: string): Promise<void> {
