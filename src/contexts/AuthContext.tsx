@@ -1,3 +1,4 @@
+
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import { User } from '@/types';
 import { authService } from '@/services/AuthService';
@@ -36,26 +37,36 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
     const initializeAuth = async () => {
       try {
-        // Get initial user - this will restore the session
-        const currentUser = await authService.getCurrentUser();
-        if (mounted) {
-          setUser(currentUser);
-          setLoading(false);
+        console.log('Initializing auth...');
+        
+        // First, try to get the current session
+        const session = await authService.restoreSession();
+        console.log('Session restored:', !!session);
+        
+        if (session) {
+          // If we have a session, get the user profile
+          const currentUser = await authService.getCurrentUser();
+          console.log('Current user loaded:', !!currentUser);
+          
+          if (mounted) {
+            setUser(currentUser);
+          }
         }
       } catch (error) {
         console.error('Error initializing auth:', error);
+      } finally {
         if (mounted) {
-          setUser(null);
           setLoading(false);
         }
       }
     };
 
-    // Initialize auth
+    // Initialize auth immediately
     initializeAuth();
 
-    // Listen for auth changes
+    // Set up auth state change listener
     const subscription = authService.onAuthStateChange((user) => {
+      console.log('Auth state change received in context:', !!user);
       if (mounted) {
         setUser(user);
         setLoading(false);
@@ -71,7 +82,6 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const signInWithGoogle = async () => {
     try {
       await authService.signInWithGoogle();
-      // User state will be updated by the auth state change listener
     } catch (error) {
       console.error('Error signing in:', error);
       throw error;
@@ -81,7 +91,6 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const signInWithEmail = async (email: string, password: string) => {
     try {
       await authService.signInWithEmail(email, password);
-      // User state will be updated by the auth state change listener
     } catch (error) {
       console.error('Error signing in:', error);
       throw error;
@@ -91,7 +100,6 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const signUpWithEmail = async (email: string, password: string, name: string) => {
     try {
       await authService.signUpWithEmail(email, password, name);
-      // User state will be updated by the auth state change listener
     } catch (error) {
       console.error('Error signing up:', error);
       throw error;
@@ -138,4 +146,4 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
-}; 
+};

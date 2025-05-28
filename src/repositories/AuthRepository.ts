@@ -1,3 +1,4 @@
+
 import { supabase } from '@/integrations/supabase/client';
 import { Database } from '@/integrations/supabase/types';
 import { User } from '@/types';
@@ -66,21 +67,18 @@ export class AuthRepository {
     if (error) throw error;
   }
 
-  async restoreSession() {
+  async getSession() {
     const { data: { session }, error } = await supabase.auth.getSession();
     if (error) throw error;
     return session;
   }
 
   async getCurrentUser(): Promise<User | null> {
-    // First try to restore the session
-    const session = await this.restoreSession();
-    if (!session) return null;
+    // Get the current session first
+    const session = await this.getSession();
+    if (!session?.user) return null;
 
-    const { data: { user }, error } = await supabase.auth.getUser();
-    
-    if (error) throw error;
-    if (!user) return null;
+    const user = session.user;
 
     // Prepare user profile data
     const profileData: UserInsert = {
@@ -111,9 +109,16 @@ export class AuthRepository {
 
   onAuthStateChange(callback: (user: User | null) => void) {
     return supabase.auth.onAuthStateChange(async (event, session) => {
+      console.log('Auth state changed:', event, session?.user?.id);
+      
       if (session?.user) {
-        const user = await this.getCurrentUser();
-        callback(user);
+        try {
+          const user = await this.getCurrentUser();
+          callback(user);
+        } catch (error) {
+          console.error('Error getting user profile:', error);
+          callback(null);
+        }
       } else {
         callback(null);
       }
