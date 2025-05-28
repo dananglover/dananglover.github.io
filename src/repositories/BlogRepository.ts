@@ -3,8 +3,6 @@ import { supabase } from '@/integrations/supabase/client';
 import { Database } from '@/integrations/supabase/types';
 import { BlogPost, Comment, CreateBlogPostForm, CreateCommentForm, PaginatedResponse } from '@/types';
 
-type Tables = Database['public']['Tables'];
-
 export class BlogRepository {
   async getBlogPosts(page = 1, limit = 12): Promise<PaginatedResponse<BlogPost>> {
     const from = (page - 1) * limit;
@@ -26,7 +24,8 @@ export class BlogRepository {
       ...post,
       images: post.images || [],
       userId: post.userId || '',
-      user: post.user || undefined
+      user: post.user || undefined,
+      published: post.published ?? false
     }));
 
     return {
@@ -57,7 +56,8 @@ export class BlogRepository {
       ...data,
       images: data.images || [],
       userId: data.userId || '',
-      user: data.user || undefined
+      user: data.user || undefined,
+      published: data.published ?? false
     };
   }
 
@@ -67,7 +67,7 @@ export class BlogRepository {
       .insert({
         title: postData.title,
         content: postData.content,
-        excerpt: postData.excerpt,
+        excerpt: postData.excerpt || '',
         images: postData.images,
         userId,
         published: postData.published,
@@ -87,7 +87,8 @@ export class BlogRepository {
       ...data,
       images: data.images || [],
       userId: data.userId || '',
-      user: data.user || undefined
+      user: data.user || undefined,
+      published: data.published ?? false
     };
   }
 
@@ -113,7 +114,8 @@ export class BlogRepository {
       ...data,
       images: data.images || [],
       userId: data.userId || '',
-      user: data.user || undefined
+      user: data.user || undefined,
+      published: data.published ?? false
     };
   }
 
@@ -143,7 +145,8 @@ export class BlogRepository {
       ...post,
       images: post.images || [],
       userId: post.userId || '',
-      user: post.user || undefined
+      user: post.user || undefined,
+      published: post.published ?? false
     }));
   }
 
@@ -163,7 +166,9 @@ export class BlogRepository {
       ...comment,
       blogPostId: comment.blogPostId || '',
       userId: comment.userId || '',
-      user: comment.user || undefined
+      user: comment.user || undefined,
+      createdAt: comment.createdAt || new Date().toISOString(),
+      updatedAt: comment.updatedAt || new Date().toISOString()
     }));
   }
 
@@ -189,7 +194,9 @@ export class BlogRepository {
       ...data,
       blogPostId: data.blogPostId || '',
       userId: data.userId || '',
-      user: data.user || undefined
+      user: data.user || undefined,
+      createdAt: data.createdAt || new Date().toISOString(),
+      updatedAt: data.updatedAt || new Date().toISOString()
     };
   }
 
