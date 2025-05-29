@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Navigation } from '@/components/layout/Navigation';
 import { Button } from '@/components/ui/button';
@@ -21,7 +20,7 @@ const EditBlogPost = () => {
   const { user } = useAuth();
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const { post, loading, error } = useBlogPost(id!);
+  const { post, loading } = useBlogPost(id!);
 
   const [formData, setFormData] = useState({
     title: post?.title || '',
