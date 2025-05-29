@@ -13,7 +13,7 @@ import {
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Textarea } from '@/components/ui/textarea';
+import { RichTextEditor } from '@/components/ui/rich-text-editor';
 import { useAuth } from '@/contexts/AuthContext';
 import { blogService } from '@/services/BlogService';
 import { CreateCommentForm } from '@/types';
@@ -68,7 +68,9 @@ export const CommentSection: React.FC<CommentSectionProps> = ({ blogPostId }) =>
             toast.error('Please sign in to post a comment');
             return;
         }
-        if (!newComment.trim()) {
+        // Strip HTML tags for content validation
+        const textContent = newComment.replace(/<[^>]*>/g, '').trim();
+        if (!textContent) {
             toast.error('Please write a comment');
             return;
         }
@@ -88,12 +90,11 @@ export const CommentSection: React.FC<CommentSectionProps> = ({ blogPostId }) =>
                     </CardHeader>
                     <CardContent>
                         <form onSubmit={handleSubmit} className="space-y-4">
-                            <Textarea
+                            <RichTextEditor
                                 value={newComment}
-                                onChange={(e) => setNewComment(e.target.value)}
+                                onChange={setNewComment}
                                 placeholder="Share your thoughts..."
-                                className="min-h-[100px]"
-                                required
+                                minHeight="100px"
                             />
                             <Button
                                 type="submit"
@@ -168,7 +169,10 @@ export const CommentSection: React.FC<CommentSectionProps> = ({ blogPostId }) =>
                                                 )}
                                             </div>
                                         </div>
-                                        <p className="mt-2 text-gray-700 whitespace-pre-wrap">{comment.content}</p>
+                                        <div 
+                                            className="mt-2 text-gray-700 prose prose-sm max-w-none"
+                                            dangerouslySetInnerHTML={{ __html: comment.content }}
+                                        />
                                     </div>
                                 </div>
                             </CardContent>

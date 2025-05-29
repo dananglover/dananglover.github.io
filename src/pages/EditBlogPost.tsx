@@ -1,9 +1,9 @@
-
 import { Navigation } from '@/components/layout/Navigation';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { RichTextEditor } from '@/components/ui/rich-text-editor';
 import { Switch } from '@/components/ui/switch';
 import { Textarea } from '@/components/ui/textarea';
 import { useAuth } from '@/contexts/AuthContext';
@@ -119,8 +119,7 @@ const EditBlogPost = () => {
     }
   };
 
-  const handleContentChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
-    const content = e.target.value;
+  const handleContentChange = (content: string) => {
     setFormData(prev => ({
       ...prev,
       content,
@@ -161,30 +160,13 @@ const EditBlogPost = () => {
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="content">Content (Markdown supported)</Label>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <Textarea
-                      id="content"
-                      value={formData.content}
-                      onChange={handleContentChange}
-                      placeholder="Write your post content here..."
-                      className="min-h-[400px] font-mono"
-                      required
-                    />
-                    <div className="border rounded-lg p-4 bg-white overflow-auto min-h-[400px] prose prose-sm max-w-none">
-                      <ReactMarkdown 
-                        remarkPlugins={[remarkGfm]}
-                        components={{
-                          p: ({ children }) => <p className="mb-4 text-gray-700 leading-relaxed whitespace-pre-wrap">{children}</p>,
-                          pre: ({ children }) => <pre className="bg-gray-100 p-4 rounded-lg overflow-x-auto mb-4 whitespace-pre-wrap">{children}</pre>,
-                          br: () => <br />,
-                        }}
-                        skipHtml={false}
-                      >
-                        {formData.content || '*Preview will appear here*'}
-                      </ReactMarkdown>
-                    </div>
-                  </div>
+                  <Label>Content</Label>
+                  <RichTextEditor
+                    value={formData.content}
+                    onChange={handleContentChange}
+                    placeholder="Write your post content here..."
+                    minHeight="400px"
+                  />
                 </div>
 
                 <div className="space-y-2">
