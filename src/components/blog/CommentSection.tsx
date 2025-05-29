@@ -1,4 +1,3 @@
-
 import {
     AlertDialog,
     AlertDialogAction,
@@ -34,7 +33,7 @@ export const CommentSection: React.FC<CommentSectionProps> = ({ blogPostId }) =>
 
     const { data: comments, isLoading } = useQuery({
         queryKey: ['blog-comments', blogPostId],
-        queryFn: () => blogService.getBlogPostComments(blogPostId)
+        queryFn: () => blogService.getBlogComments(blogPostId)
     });
 
     const createCommentMutation = useMutation({

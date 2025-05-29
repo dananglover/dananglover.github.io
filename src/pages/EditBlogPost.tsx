@@ -1,18 +1,18 @@
+
+import React, { useState } from 'react';
 import { Navigation } from '@/components/layout/Navigation';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
+import { Textarea } from '@/components/ui/textarea';
 import { RichTextEditor } from '@/components/ui/rich-text-editor';
 import { useAuth } from '@/contexts/AuthContext';
 import { useBlogPost } from '@/hooks/useBlog';
 import { blogService } from '@/services/BlogService';
-import { CreateBlogPostForm } from '@/types';
-import { useMutation } from '@tanstack/react-query';
 import { ArrowLeft } from 'lucide-react';
-import { useEffect, useState } from 'react';
-import { Link, useNavigate, useParams } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import { toast } from 'sonner';
 
 const EditBlogPost = () => {
@@ -21,7 +21,7 @@ const EditBlogPost = () => {
   const { user } = useAuth();
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const { data: post, isLoading } = useBlogPost(id);
+  const { post, loading, error } = useBlogPost(id!);
 
   const [formData, setFormData] = useState({
     title: post?.title || '',
@@ -43,7 +43,7 @@ const EditBlogPost = () => {
     }
   }, [post]);
 
-  if (isLoading) {
+  if (loading) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-orange-50 to-teal-50">
         <Navigation />
@@ -169,7 +169,7 @@ const EditBlogPost = () => {
                   <Textarea
                     id="excerpt"
                     value={formData.excerpt}
-                    onChange={(e) => setFormData(prev => ({ ...prev, excerpt: e.target.value }))}
+                    onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => setFormData(prev => ({ ...prev, excerpt: e.target.value }))}
                     placeholder="A brief summary of your post"
                     className="h-24"
                   />
