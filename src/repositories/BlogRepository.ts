@@ -1,6 +1,5 @@
 
 import { supabase } from '@/integrations/supabase/client';
-import { Database } from '@/integrations/supabase/types';
 import { BlogPost, Comment, CreateBlogPostForm, CreateCommentForm, PaginatedResponse } from '@/types';
 
 export class BlogRepository {
@@ -25,7 +24,9 @@ export class BlogRepository {
       images: post.images || [],
       userId: post.userId || '',
       user: post.user || undefined,
-      published: post.published ?? false
+      published: post.published ?? false,
+      createdAt: post.createdAt || new Date().toISOString(),
+      updatedAt: post.updatedAt || new Date().toISOString()
     }));
 
     return {
@@ -57,7 +58,9 @@ export class BlogRepository {
       images: data.images || [],
       userId: data.userId || '',
       user: data.user || undefined,
-      published: data.published ?? false
+      published: data.published ?? false,
+      createdAt: data.createdAt || new Date().toISOString(),
+      updatedAt: data.updatedAt || new Date().toISOString()
     };
   }
 
@@ -88,7 +91,9 @@ export class BlogRepository {
       images: data.images || [],
       userId: data.userId || '',
       user: data.user || undefined,
-      published: data.published ?? false
+      published: data.published ?? false,
+      createdAt: data.createdAt || new Date().toISOString(),
+      updatedAt: data.updatedAt || new Date().toISOString()
     };
   }
 
@@ -115,7 +120,9 @@ export class BlogRepository {
       images: data.images || [],
       userId: data.userId || '',
       user: data.user || undefined,
-      published: data.published ?? false
+      published: data.published ?? false,
+      createdAt: data.createdAt || new Date().toISOString(),
+      updatedAt: data.updatedAt || new Date().toISOString()
     };
   }
 
@@ -146,7 +153,9 @@ export class BlogRepository {
       images: post.images || [],
       userId: post.userId || '',
       user: post.user || undefined,
-      published: post.published ?? false
+      published: post.published ?? false,
+      createdAt: post.createdAt || new Date().toISOString(),
+      updatedAt: post.updatedAt || new Date().toISOString()
     }));
   }
 

@@ -2,8 +2,8 @@ import { Navigation } from '@/components/layout/Navigation';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
+import { RichTextEditor } from '@/components/ui/rich-text-editor';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/components/ui/use-toast';
 import { useAuth } from '@/contexts/AuthContext';
 import { placeService } from '@/services/PlaceService';
@@ -85,9 +85,13 @@ const CreatePlace = () => {
     );
   }
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     setFormData(prev => ({ ...prev, [name]: value }));
+  };
+
+  const handleDescriptionChange = (value: string) => {
+    setFormData(prev => ({ ...prev, description: value }));
   };
 
   const handleTypeChange = (value: string) => {
@@ -174,17 +178,14 @@ const CreatePlace = () => {
                 </div>
 
                 <div>
-                  <label htmlFor="description" className="block text-sm font-medium text-gray-700 mb-1">
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
                     Description
                   </label>
-                  <Textarea
-                    id="description"
-                    name="description"
+                  <RichTextEditor
                     value={formData.description}
-                    onChange={handleInputChange}
-                    required
+                    onChange={handleDescriptionChange}
                     placeholder="Describe this place..."
-                    rows={4}
+                    minHeight="150px"
                   />
                 </div>
 
