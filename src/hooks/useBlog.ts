@@ -1,6 +1,6 @@
 
 import { useState, useEffect } from 'react';
-import { BlogPost, PaginatedResponse } from '@/types';
+import { BlogPost } from '@/types';
 import { blogService } from '@/services/BlogService';
 
 export const useBlogPosts = (page = 1, limit = 12) => {

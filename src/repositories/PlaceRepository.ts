@@ -1,3 +1,4 @@
+
 import { supabase } from '@/integrations/supabase/client';
 import { Place, PlaceType, Review, CreatePlaceForm, CreateReviewForm, PaginatedResponse } from '@/types';
 
@@ -28,6 +29,8 @@ export class PlaceRepository {
       photos: place.photos || [],
       userId: place.userId || '',
       placeTypeId: place.placeTypeId || '',
+      rating: place.rating || 0,
+      reviewsCount: place.reviewsCount || 0,
       placeType: place.placeType ? {
         id: place.placeType.id,
         name: place.placeType.name,
@@ -68,6 +71,8 @@ export class PlaceRepository {
       photos: data.photos || [],
       userId: data.userId || '',
       placeTypeId: data.placeTypeId || '',
+      rating: data.rating || 0,
+      reviewsCount: data.reviewsCount || 0,
       placeType: data.placeType ? {
         id: data.placeType.id,
         name: data.placeType.name,
@@ -129,6 +134,8 @@ export class PlaceRepository {
       photos: data.photos || [],
       userId: data.userId || '',
       placeTypeId: data.placeTypeId || '',
+      rating: data.rating || 0,
+      reviewsCount: data.reviewsCount || 0,
       placeType: data.placeType ? {
         id: data.placeType.id,
         name: data.placeType.name,
@@ -163,6 +170,8 @@ export class PlaceRepository {
       photos: data.photos || [],
       userId: data.userId || '',
       placeTypeId: data.placeTypeId || '',
+      rating: data.rating || 0,
+      reviewsCount: data.reviewsCount || 0,
       placeType: data.placeType ? {
         id: data.placeType.id,
         name: data.placeType.name,
@@ -256,7 +265,7 @@ export class PlaceRepository {
     if (error) throw error;
 
     // Update place rating after deletion
-    if (review) {
+    if (review?.placeId) {
       await this.updatePlaceRating(review.placeId);
     }
   }
@@ -309,19 +318,22 @@ export class PlaceRepository {
       .order('createdAt', { ascending: false });
 
     if (error) throw error;
-    return (data?.map(favorite => ({
-      ...favorite.place,
-      photos: favorite.place.photos || [],
-      userId: favorite.place.userId || '',
-      placeTypeId: favorite.place.placeTypeId || '',
-      placeType: favorite.place.placeType ? {
-        id: favorite.place.placeType.id,
-        name: favorite.place.placeType.name,
-        description: favorite.place.placeType.description || undefined
+    
+    return (data?.filter(favorite => favorite.place).map(favorite => ({
+      ...favorite.place!,
+      photos: favorite.place!.photos || [],
+      userId: favorite.place!.userId || '',
+      placeTypeId: favorite.place!.placeTypeId || '',
+      rating: favorite.place!.rating || 0,
+      reviewsCount: favorite.place!.reviewsCount || 0,
+      placeType: favorite.place!.placeType ? {
+        id: favorite.place!.placeType.id,
+        name: favorite.place!.placeType.name,
+        description: favorite.place!.placeType.description || undefined
       } : undefined,
-      user: favorite.place.user || undefined,
-      createdAt: favorite.place.createdAt || new Date().toISOString(),
-      updatedAt: favorite.place.updatedAt || new Date().toISOString()
+      user: favorite.place!.user || undefined,
+      createdAt: favorite.place!.createdAt || new Date().toISOString(),
+      updatedAt: favorite.place!.updatedAt || new Date().toISOString()
     })) || []) as Place[];
   }
 
