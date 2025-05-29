@@ -1,6 +1,6 @@
 
 import { useState, useEffect } from 'react';
-import { Place, PaginatedResponse } from '@/types';
+import { Place } from '@/types';
 import { placeService } from '@/services/PlaceService';
 
 export const usePlaces = (page = 1, limit = 12, placeTypeId?: string) => {

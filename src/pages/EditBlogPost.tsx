@@ -3,17 +3,16 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { RichTextEditor } from '@/components/ui/rich-text-editor';
 import { Switch } from '@/components/ui/switch';
-import { Textarea } from '@/components/ui/textarea';
+import { RichTextEditor } from '@/components/ui/rich-text-editor';
 import { useAuth } from '@/contexts/AuthContext';
+import { useBlogPost } from '@/hooks/useBlog';
 import { blogService } from '@/services/BlogService';
-import { useQuery } from '@tanstack/react-query';
+import { CreateBlogPostForm } from '@/types';
+import { useMutation } from '@tanstack/react-query';
 import { ArrowLeft } from 'lucide-react';
-import React, { useState } from 'react';
-import ReactMarkdown from 'react-markdown';
-import { useNavigate, useParams } from 'react-router-dom';
-import remarkGfm from 'remark-gfm';
+import { useEffect, useState } from 'react';
+import { Link, useNavigate, useParams } from 'react-router-dom';
 import { toast } from 'sonner';
 
 const EditBlogPost = () => {
@@ -22,11 +21,7 @@ const EditBlogPost = () => {
   const { user } = useAuth();
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const { data: post, isLoading } = useQuery({
-    queryKey: ['blog-post', id],
-    queryFn: () => blogService.getBlogPostById(id!),
-    enabled: !!id
-  });
+  const { data: post, isLoading } = useBlogPost(id);
 
   const [formData, setFormData] = useState({
     title: post?.title || '',

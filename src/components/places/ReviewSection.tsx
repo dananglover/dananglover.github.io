@@ -13,7 +13,7 @@ import {
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Textarea } from '@/components/ui/textarea';
+import { RichTextEditor } from '@/components/ui/rich-text-editor';
 import { useAuth } from '@/contexts/AuthContext';
 import { placeService } from '@/services/PlaceService';
 import { CreateReviewForm } from '@/types';
@@ -129,12 +129,11 @@ export const ReviewSection: React.FC<ReviewSectionProps> = ({ placeId }) => {
                                     </button>
                                 ))}
                             </div>
-                            <Textarea
+                            <RichTextEditor
                                 value={newReview.content}
-                                onChange={(e) => setNewReview(prev => ({ ...prev, content: e.target.value }))}
+                                onChange={(value) => setNewReview(prev => ({ ...prev, content: value }))}
                                 placeholder="Share your experience..."
-                                className="min-h-[100px]"
-                                required
+                                minHeight="120px"
                             />
                             <Button
                                 type="submit"
@@ -214,7 +213,7 @@ export const ReviewSection: React.FC<ReviewSectionProps> = ({ placeId }) => {
                                                 )}
                                             </div>
                                         </div>
-                                        <p className="mt-2 text-gray-700 whitespace-pre-wrap">{review.content}</p>
+                                        <div className="mt-2 text-gray-700" dangerouslySetInnerHTML={{ __html: review.content }} />
                                     </div>
                                 </div>
                             </CardContent>

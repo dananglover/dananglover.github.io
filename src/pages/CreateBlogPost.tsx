@@ -1,18 +1,18 @@
+
 import { Navigation } from '@/components/layout/Navigation';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { RichTextEditor } from '@/components/ui/rich-text-editor';
 import { Switch } from '@/components/ui/switch';
-import { Textarea } from '@/components/ui/textarea';
+import { RichTextEditor } from '@/components/ui/rich-text-editor';
 import { useAuth } from '@/contexts/AuthContext';
 import { blogService } from '@/services/BlogService';
+import { CreateBlogPostForm } from '@/types';
+import { useMutation } from '@tanstack/react-query';
 import { ArrowLeft } from 'lucide-react';
-import React, { useState } from 'react';
-import ReactMarkdown from 'react-markdown';
+import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import remarkGfm from 'remark-gfm';
 import { toast } from 'sonner';
 
 const CreateBlogPost = () => {
