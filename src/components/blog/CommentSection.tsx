@@ -166,7 +166,10 @@ export const CommentSection: React.FC<CommentSectionProps> = ({ blogPostId }) =>
                                                 </AlertDialog>
                                             )}
                                         </div>
-                                        <div className="mt-2 text-gray-700 prose prose-sm max-w-none" dangerouslySetInnerHTML={{ __html: comment.content }} />
+                                        <div 
+                                          className="mt-2 text-gray-700 prose prose-sm max-w-none whitespace-pre-wrap [&_br]:block [&_br]:mb-1 [&_p]:mb-2" 
+                                          dangerouslySetInnerHTML={{ __html: comment.content }} 
+                                        />
                                     </div>
                                 </div>
                             </CardContent>

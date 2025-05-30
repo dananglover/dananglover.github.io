@@ -1,4 +1,3 @@
-
 import {
     AlertDialog,
     AlertDialogAction,
@@ -213,7 +212,10 @@ export const ReviewSection: React.FC<ReviewSectionProps> = ({ placeId }) => {
                                                 )}
                                             </div>
                                         </div>
-                                        <div className="mt-2 text-gray-700" dangerouslySetInnerHTML={{ __html: review.content }} />
+                                        <div 
+                                          className="mt-2 text-gray-700 prose prose-sm max-w-none whitespace-pre-wrap [&_br]:block [&_br]:mb-1 [&_p]:mb-2" 
+                                          dangerouslySetInnerHTML={{ __html: review.content }} 
+                                        />
                                     </div>
                                 </div>
                             </CardContent>

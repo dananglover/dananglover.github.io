@@ -110,7 +110,10 @@ const BlogDetail = () => {
                 <span>By {post.user?.name || 'Anonymous'}</span>
               </div>
 
-              <div className="prose prose-lg max-w-none" dangerouslySetInnerHTML={{ __html: post.content }} />
+              <div 
+                className="prose prose-lg max-w-none whitespace-pre-wrap [&_br]:block [&_br]:mb-2 [&_p]:mb-4" 
+                dangerouslySetInnerHTML={{ __html: post.content }} 
+              />
             </div>
           </article>
 

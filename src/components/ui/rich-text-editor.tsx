@@ -35,10 +35,21 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({
     }
   }, [onChange]);
 
+  const handleKeyDown = useCallback((e: React.KeyboardEvent) => {
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault();
+      document.execCommand('insertHTML', false, '<br><br>');
+      if (editorRef.current) {
+        onChange(editorRef.current.innerHTML);
+      }
+    }
+  }, [onChange]);
+
   const handlePaste = useCallback((e: React.ClipboardEvent) => {
     e.preventDefault();
     const text = e.clipboardData.getData('text/plain');
-    document.execCommand('insertText', false, text);
+    const formattedText = text.replace(/\n/g, '<br>');
+    document.execCommand('insertHTML', false, formattedText);
   }, []);
 
   React.useEffect(() => {
@@ -83,17 +94,19 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({
         ref={editorRef}
         contentEditable
         onInput={handleInput}
+        onKeyDown={handleKeyDown}
         onPaste={handlePaste}
         className={cn(
-          "p-3 outline-none focus:ring-0 overflow-auto",
+          "p-3 outline-none focus:ring-0 overflow-auto whitespace-pre-wrap",
           "prose prose-sm max-w-none",
-          "[&_h1]:text-2xl [&_h1]:font-bold [&_h1]:mb-2",
-          "[&_h2]:text-xl [&_h2]:font-semibold [&_h2]:mb-2",
-          "[&_h3]:text-lg [&_h3]:font-medium [&_h3]:mb-2",
+          "[&_h1]:text-2xl [&_h1]:font-bold [&_h1]:mb-2 [&_h1]:mt-4",
+          "[&_h2]:text-xl [&_h2]:font-semibold [&_h2]:mb-2 [&_h2]:mt-3",
+          "[&_h3]:text-lg [&_h3]:font-medium [&_h3]:mb-2 [&_h3]:mt-2",
           "[&_ul]:list-disc [&_ul]:pl-6 [&_ul]:mb-2",
           "[&_ol]:list-decimal [&_ol]:pl-6 [&_ol]:mb-2",
           "[&_li]:mb-1",
           "[&_p]:mb-2",
+          "[&_br]:block [&_br]:mb-2",
           "[&_strong]:font-bold",
           "[&_em]:italic",
           "[&_u]:underline",
