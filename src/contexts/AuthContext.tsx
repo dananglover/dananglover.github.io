@@ -35,39 +35,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   useEffect(() => {
     let mounted = true;
 
-    const initializeAuth = async () => {
-      try {
-        console.log('Initializing auth...');
-        
-        // First, try to get the current session
-        const session = await authService.restoreSession();
-        console.log('Session restored:', !!session);
-        
-        if (session) {
-          // If we have a session, get the user profile
-          const currentUser = await authService.getCurrentUser();
-          console.log('Current user loaded:', !!currentUser);
-          
-          if (mounted) {
-            setUser(currentUser);
-          }
-        } else {
-          // No session found - user is not authenticated, but that's OK
-          console.log('No session found - user not authenticated');
-        }
-      } catch (error) {
-        console.error('Error initializing auth:', error);
-      } finally {
-        if (mounted) {
-          setLoading(false);
-        }
-      }
-    };
-
-    // Initialize auth immediately
-    initializeAuth();
-
-    // Set up auth state change listener
+    // Set up auth state change listener FIRST
     const subscription = authService.onAuthStateChange((user) => {
       console.log('Auth state change received in context:', !!user);
       if (mounted) {
@@ -76,6 +44,33 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       }
     });
 
+    // THEN check for existing session
+    const initializeAuth = async () => {
+      try {
+        console.log('Initializing auth...');
+        
+        const session = await authService.restoreSession();
+        console.log('Session restored:', !!session);
+        
+        if (session?.user && mounted) {
+          // The auth state change listener will handle setting the user
+          console.log('Session found, auth state change will handle user');
+        } else {
+          console.log('No session found - user not authenticated');
+          if (mounted) {
+            setLoading(false);
+          }
+        }
+      } catch (error) {
+        console.error('Error initializing auth:', error);
+        if (mounted) {
+          setLoading(false);
+        }
+      }
+    };
+
+    initializeAuth();
+
     return () => {
       mounted = false;
       subscription.data?.subscription?.unsubscribe?.();
@@ -83,28 +78,36 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   }, []);
 
   const signInWithGoogle = async () => {
+    setLoading(true);
     try {
       await authService.signInWithGoogle();
     } catch (error) {
-      console.error('Error signing in:', error);
+      console.error('Error signing in with Google:', error);
+      setLoading(false);
       throw error;
     }
   };
 
   const signInWithEmail = async (email: string, password: string) => {
+    setLoading(true);
     try {
       await authService.signInWithEmail(email, password);
+      // Don't set loading to false here - let the auth state change handle it
     } catch (error) {
       console.error('Error signing in:', error);
+      setLoading(false);
       throw error;
     }
   };
 
   const signUpWithEmail = async (email: string, password: string, name: string) => {
+    setLoading(true);
     try {
       await authService.signUpWithEmail(email, password, name);
+      setLoading(false);
     } catch (error) {
       console.error('Error signing up:', error);
+      setLoading(false);
       throw error;
     }
   };

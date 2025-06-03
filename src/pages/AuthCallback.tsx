@@ -1,19 +1,32 @@
+
 import { Navigation } from '@/components/layout/Navigation';
+import { useAuth } from '@/contexts/AuthContext';
 import { Loader2 } from 'lucide-react';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
 const AuthCallback = () => {
   const navigate = useNavigate();
+  const { user, loading } = useAuth();
+  const [hasRedirected, setHasRedirected] = useState(false);
 
   useEffect(() => {
-    // After a short delay to ensure auth state is updated, redirect to home
-    const timer = setTimeout(() => {
-      navigate('/', { replace: true });
-    }, 1000);
+    console.log('AuthCallback - user:', !!user, 'loading:', loading, 'hasRedirected:', hasRedirected);
 
-    return () => clearTimeout(timer);
-  }, [navigate]);
+    // If we're not loading and haven't redirected yet
+    if (!loading && !hasRedirected) {
+      setHasRedirected(true);
+      
+      if (user) {
+        console.log('User authenticated, redirecting to home');
+        navigate('/', { replace: true });
+      } else {
+        console.log('No user found, redirecting to home');
+        // Even if no user, redirect to home (they might have cancelled the flow)
+        navigate('/', { replace: true });
+      }
+    }
+  }, [user, loading, navigate, hasRedirected]);
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-orange-50 to-teal-50">
@@ -29,4 +42,4 @@ const AuthCallback = () => {
   );
 };
 
-export default AuthCallback; 
+export default AuthCallback;

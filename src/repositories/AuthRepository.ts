@@ -1,3 +1,4 @@
+
 import { supabase } from '@/integrations/supabase/client';
 import { Database } from '@/integrations/supabase/types';
 import { User } from '@/types';
@@ -32,6 +33,7 @@ export class AuthRepository {
       email,
       password,
       options: {
+        emailRedirectTo: `${window.location.origin}/auth/callback`,
         data: {
           full_name: name
         }
@@ -110,13 +112,16 @@ export class AuthRepository {
       console.log('Auth state changed:', event, session?.user?.id);
       
       if (session?.user) {
-        try {
-          const user = await this.getCurrentUser();
-          callback(user);
-        } catch (error) {
-          console.error('Error getting user profile:', error);
-          callback(null);
-        }
+        // Use setTimeout to prevent deadlock
+        setTimeout(async () => {
+          try {
+            const user = await this.getCurrentUser();
+            callback(user);
+          } catch (error) {
+            console.error('Error getting user profile:', error);
+            callback(null);
+          }
+        }, 0);
       } else {
         callback(null);
       }
