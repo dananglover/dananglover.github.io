@@ -1,4 +1,3 @@
-
 import {
     AlertDialog,
     AlertDialogAction,
@@ -13,10 +12,10 @@ import {
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Textarea } from '@/components/ui/textarea';
+import { RichTextEditor } from '@/components/ui/rich-text-editor';
 import { useAuth } from '@/contexts/AuthContext';
 import { blogService } from '@/services/BlogService';
-import { CreateCommentForm } from '@/types';
+import { Comment, CreateCommentForm } from '@/types';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { format } from 'date-fns';
 import { Trash2 } from 'lucide-react';
@@ -88,12 +87,11 @@ export const CommentSection: React.FC<CommentSectionProps> = ({ blogPostId }) =>
                     </CardHeader>
                     <CardContent>
                         <form onSubmit={handleSubmit} className="space-y-4">
-                            <Textarea
+                            <RichTextEditor
                                 value={newComment}
-                                onChange={(e) => setNewComment(e.target.value)}
+                                onChange={setNewComment}
                                 placeholder="Share your thoughts..."
-                                className="min-h-[100px]"
-                                required
+                                minHeight="120px"
                             />
                             <Button
                                 type="submit"
@@ -119,7 +117,7 @@ export const CommentSection: React.FC<CommentSectionProps> = ({ blogPostId }) =>
                         ))}
                     </div>
                 ) : comments && comments.length > 0 ? (
-                    comments.map((comment) => (
+                    comments.map((comment: Comment) => (
                         <Card key={comment.id}>
                             <CardContent className="pt-6">
                                 <div className="flex items-start space-x-4">
@@ -131,44 +129,47 @@ export const CommentSection: React.FC<CommentSectionProps> = ({ blogPostId }) =>
                                     </Avatar>
                                     <div className="flex-1">
                                         <div className="flex items-center justify-between">
-                                            <p className="font-medium">{comment.user?.name || 'Anonymous'}</p>
-                                            <div className="flex items-center space-x-2">
+                                            <div>
+                                                <p className="font-medium">{comment.user?.name || 'Anonymous'}</p>
                                                 <span className="text-sm text-gray-500">
                                                     {format(new Date(comment.createdAt), 'MMM d, yyyy')}
                                                 </span>
-                                                {user && comment.userId === user.id && (
-                                                    <AlertDialog>
-                                                        <AlertDialogTrigger asChild>
-                                                            <Button
-                                                                variant="ghost"
-                                                                size="sm"
-                                                                className="text-red-600 hover:text-red-700 hover:bg-red-50"
-                                                            >
-                                                                <Trash2 className="h-4 w-4" />
-                                                            </Button>
-                                                        </AlertDialogTrigger>
-                                                        <AlertDialogContent>
-                                                            <AlertDialogHeader>
-                                                                <AlertDialogTitle>Delete Comment</AlertDialogTitle>
-                                                                <AlertDialogDescription>
-                                                                    Are you sure you want to delete this comment? This action cannot be undone.
-                                                                </AlertDialogDescription>
-                                                            </AlertDialogHeader>
-                                                            <AlertDialogFooter>
-                                                                <AlertDialogCancel>Cancel</AlertDialogCancel>
-                                                                <AlertDialogAction
-                                                                    onClick={() => handleDeleteComment(comment.id)}
-                                                                    className="bg-red-600 hover:bg-red-700"
-                                                                >
-                                                                    Delete
-                                                                </AlertDialogAction>
-                                                            </AlertDialogFooter>
-                                                        </AlertDialogContent>
-                                                    </AlertDialog>
-                                                )}
                                             </div>
+                                            {user && comment.userId === user.id && (
+                                                <AlertDialog>
+                                                    <AlertDialogTrigger asChild>
+                                                        <Button
+                                                            variant="ghost"
+                                                            size="sm"
+                                                            className="text-red-600 hover:text-red-700 hover:bg-red-50"
+                                                        >
+                                                            <Trash2 className="h-4 w-4" />
+                                                        </Button>
+                                                    </AlertDialogTrigger>
+                                                    <AlertDialogContent>
+                                                        <AlertDialogHeader>
+                                                            <AlertDialogTitle>Delete Comment</AlertDialogTitle>
+                                                            <AlertDialogDescription>
+                                                                Are you sure you want to delete this comment? This action cannot be undone.
+                                                            </AlertDialogDescription>
+                                                        </AlertDialogHeader>
+                                                        <AlertDialogFooter>
+                                                            <AlertDialogCancel>Cancel</AlertDialogCancel>
+                                                            <AlertDialogAction
+                                                                onClick={() => handleDeleteComment(comment.id)}
+                                                                className="bg-red-600 hover:bg-red-700"
+                                                            >
+                                                                Delete
+                                                            </AlertDialogAction>
+                                                        </AlertDialogFooter>
+                                                    </AlertDialogContent>
+                                                </AlertDialog>
+                                            )}
                                         </div>
-                                        <p className="mt-2 text-gray-700 whitespace-pre-wrap">{comment.content}</p>
+                                        <div 
+                                          className="mt-2 text-gray-700 prose prose-sm max-w-none whitespace-pre-wrap [&_br]:block [&_br]:mb-1 [&_p]:mb-2" 
+                                          dangerouslySetInnerHTML={{ __html: comment.content }} 
+                                        />
                                     </div>
                                 </div>
                             </CardContent>

@@ -12,7 +12,7 @@ export type User = {
 export interface PlaceType {
   id: string;
   name: string;
-  description?: string;
+  description?: string | null;
 }
 
 export interface Place {
@@ -26,7 +26,7 @@ export interface Place {
   location: string;
   rating: number;
   reviewsCount: number;
-  userId: string | null;
+  userId: string;
   user?: User;
   createdAt: string;
   updatedAt: string;
@@ -35,7 +35,7 @@ export interface Place {
 export interface Review {
   id: string;
   placeId: string;
-  userId: string | null;
+  userId: string;
   user?: User;
   rating: number;
   content: string;
@@ -56,7 +56,7 @@ export interface BlogPost {
   content: string;
   excerpt: string;
   images: string[];
-  userId: string | null;
+  userId: string;
   user?: User;
   published: boolean;
   publishedAt?: string | null;
@@ -67,7 +67,7 @@ export interface BlogPost {
 export interface Comment {
   id: string;
   blogPostId: string;
-  userId: string | null;
+  userId: string;
   user?: User;
   content: string;
   createdAt: string;

@@ -1,4 +1,3 @@
-
 import { Navigation } from '@/components/layout/Navigation';
 import { ReviewSection } from '@/components/places/ReviewSection';
 import { Badge } from '@/components/ui/badge';
@@ -148,7 +147,10 @@ const PlaceDetail = () => {
               <Card>
                 <CardContent className="p-6">
                   <h3 className="text-lg font-semibold mb-3">About this place</h3>
-                  <p className="text-gray-700 leading-relaxed">{place.description}</p>
+                  <div 
+                    className="text-gray-700 leading-relaxed prose prose-sm max-w-none whitespace-pre-wrap [&_br]:block [&_br]:mb-2 [&_p]:mb-3" 
+                    dangerouslySetInnerHTML={{ __html: place.description }} 
+                  />
                 </CardContent>
               </Card>
             </div>

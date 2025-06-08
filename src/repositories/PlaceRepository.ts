@@ -1,10 +1,6 @@
 
 import { supabase } from '@/integrations/supabase/client';
-import { Database } from '@/integrations/supabase/types';
 import { Place, PlaceType, Review, CreatePlaceForm, CreateReviewForm, PaginatedResponse } from '@/types';
-
-type Tables = Database['public']['Tables'];
-type PlacesInsert = Tables['places']['Insert'];
 
 export class PlaceRepository {
   async getPlaces(page = 1, limit = 12, placeTypeId?: string): Promise<PaginatedResponse<Place>> {
@@ -32,8 +28,17 @@ export class PlaceRepository {
       ...place,
       photos: place.photos || [],
       userId: place.userId || '',
-      placeType: place.placeType || undefined,
-      user: place.user || undefined
+      placeTypeId: place.placeTypeId || '',
+      rating: place.rating || 0,
+      reviewsCount: place.reviewsCount || 0,
+      placeType: place.placeType ? {
+        id: place.placeType.id,
+        name: place.placeType.name,
+        description: place.placeType.description || undefined
+      } : undefined,
+      user: place.user || undefined,
+      createdAt: place.createdAt || new Date().toISOString(),
+      updatedAt: place.updatedAt || new Date().toISOString()
     }));
 
     return {
@@ -65,8 +70,17 @@ export class PlaceRepository {
       ...data,
       photos: data.photos || [],
       userId: data.userId || '',
-      placeType: data.placeType || undefined,
-      user: data.user || undefined
+      placeTypeId: data.placeTypeId || '',
+      rating: data.rating || 0,
+      reviewsCount: data.reviewsCount || 0,
+      placeType: data.placeType ? {
+        id: data.placeType.id,
+        name: data.placeType.name,
+        description: data.placeType.description || undefined
+      } : undefined,
+      user: data.user || undefined,
+      createdAt: data.createdAt || new Date().toISOString(),
+      updatedAt: data.updatedAt || new Date().toISOString()
     };
   }
 
@@ -75,7 +89,7 @@ export class PlaceRepository {
     const photoUrls: string[] = [];
     for (const photo of placeData.photos) {
       const fileName = `${Date.now()}-${Math.random().toString(36).substring(7)}`;
-      const { data: uploadData, error: uploadError } = await supabase.storage
+      const { error: uploadError } = await supabase.storage
         .from('place-photos')
         .upload(fileName, photo);
 
@@ -94,7 +108,7 @@ export class PlaceRepository {
     // Create place record
     const { data, error } = await supabase
       .from('places')
-      .insert<PlacesInsert>({
+      .insert({
         name: placeData.name,
         description: placeData.description,
         price: placeData.price,
@@ -119,12 +133,21 @@ export class PlaceRepository {
       ...data,
       photos: data.photos || [],
       userId: data.userId || '',
-      placeType: data.placeType || undefined,
-      user: data.user || undefined
+      placeTypeId: data.placeTypeId || '',
+      rating: data.rating || 0,
+      reviewsCount: data.reviewsCount || 0,
+      placeType: data.placeType ? {
+        id: data.placeType.id,
+        name: data.placeType.name,
+        description: data.placeType.description || undefined
+      } : undefined,
+      user: data.user || undefined,
+      createdAt: data.createdAt || new Date().toISOString(),
+      updatedAt: data.updatedAt || new Date().toISOString()
     };
   }
 
-  async updatePlace(id: string, updateData: Partial<CreatePlaceForm>, userId: string): Promise<Place> {
+  async updatePlace(id: string, updateData: Omit<Partial<CreatePlaceForm>, 'photos'>, userId: string): Promise<Place> {
     const { data, error } = await supabase
       .from('places')
       .update({
@@ -146,8 +169,17 @@ export class PlaceRepository {
       ...data,
       photos: data.photos || [],
       userId: data.userId || '',
-      placeType: data.placeType || undefined,
-      user: data.user || undefined
+      placeTypeId: data.placeTypeId || '',
+      rating: data.rating || 0,
+      reviewsCount: data.reviewsCount || 0,
+      placeType: data.placeType ? {
+        id: data.placeType.id,
+        name: data.placeType.name,
+        description: data.placeType.description || undefined
+      } : undefined,
+      user: data.user || undefined,
+      createdAt: data.createdAt || new Date().toISOString(),
+      updatedAt: data.updatedAt || new Date().toISOString()
     };
   }
 
@@ -175,8 +207,11 @@ export class PlaceRepository {
 
     return (data || []).map(review => ({
       ...review,
+      placeId: review.placeId || '',
       userId: review.userId || '',
-      user: review.user || undefined
+      user: review.user || undefined,
+      createdAt: review.createdAt || new Date().toISOString(),
+      updatedAt: review.updatedAt || new Date().toISOString()
     }));
   }
 
@@ -204,8 +239,11 @@ export class PlaceRepository {
 
     return {
       ...data,
+      placeId: data.placeId || '',
       userId: data.userId || '',
-      user: data.user || undefined
+      user: data.user || undefined,
+      createdAt: data.createdAt || new Date().toISOString(),
+      updatedAt: data.updatedAt || new Date().toISOString()
     };
   }
 
@@ -227,7 +265,7 @@ export class PlaceRepository {
     if (error) throw error;
 
     // Update place rating after deletion
-    if (review) {
+    if (review?.placeId) {
       await this.updatePlaceRating(review.placeId);
     }
   }
@@ -280,12 +318,22 @@ export class PlaceRepository {
       .order('createdAt', { ascending: false });
 
     if (error) throw error;
-    return (data?.map(favorite => ({
-      ...favorite.place,
-      photos: favorite.place.photos || [],
-      userId: favorite.place.userId || '',
-      placeType: favorite.place.placeType || undefined,
-      user: favorite.place.user || undefined
+    
+    return (data?.filter(favorite => favorite.place).map(favorite => ({
+      ...favorite.place!,
+      photos: favorite.place!.photos || [],
+      userId: favorite.place!.userId || '',
+      placeTypeId: favorite.place!.placeTypeId || '',
+      rating: favorite.place!.rating || 0,
+      reviewsCount: favorite.place!.reviewsCount || 0,
+      placeType: favorite.place!.placeType ? {
+        id: favorite.place!.placeType.id,
+        name: favorite.place!.placeType.name,
+        description: favorite.place!.placeType.description || undefined
+      } : undefined,
+      user: favorite.place!.user || undefined,
+      createdAt: favorite.place!.createdAt || new Date().toISOString(),
+      updatedAt: favorite.place!.updatedAt || new Date().toISOString()
     })) || []) as Place[];
   }
 
@@ -296,7 +344,11 @@ export class PlaceRepository {
       .order('name');
 
     if (error) throw error;
-    return data || [];
+    return (data || []).map(type => ({
+      id: type.id,
+      name: type.name,
+      description: type.description || undefined
+    }));
   }
 
   private async updatePlaceRating(placeId: string): Promise<void> {
