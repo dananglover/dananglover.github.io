@@ -3,7 +3,7 @@ import { placeRepository } from '@/repositories/PlaceRepository';
 import { CreatePlaceForm, CreateReviewForm, PaginatedResponse, Place, PlaceType, Review } from '@/types';
 
 export class PlaceService {
-  constructor(private repository = placeRepository) {}
+  constructor(private repository = placeRepository) { }
 
   async getPlaces(page = 1, limit = 12, placeTypeId?: string): Promise<PaginatedResponse<Place>> {
     return this.repository.getPlaces(page, limit, placeTypeId);
@@ -15,6 +15,11 @@ export class PlaceService {
 
   async createPlace(placeData: CreatePlaceForm, userId: string): Promise<Place> {
     try {
+      console.log('PlaceService.createPlace called with:', {
+        photoCount: placeData.photos?.length || 0,
+        photos: placeData.photos?.map(p => ({ name: p.name, size: p.size, type: p.type }))
+      });
+
       // Validate required fields
       if (!placeData.name || !placeData.description || !placeData.price || !placeData.placeTypeId || !placeData.location) {
         throw new Error('All fields are required');
@@ -33,11 +38,7 @@ export class PlaceService {
         }
       }
 
-      console.log('Creating place with service...', {
-        name: placeData.name,
-        photoCount: placeData.photos.length,
-        userId
-      });
+      console.log('Validations passed, calling repository...');
 
       const place = await this.repository.createPlace(placeData, userId);
       console.log('Place created successfully in service');
@@ -49,7 +50,22 @@ export class PlaceService {
   }
 
   async updatePlace(id: string, placeData: Partial<CreatePlaceForm>, userId: string): Promise<Place> {
-    return this.repository.updatePlace(id, placeData, userId);
+    try {
+      // Validate photo sizes if new photos are provided (max 10MB each)
+      if ('photos' in placeData && placeData.photos && placeData.photos.length > 0) {
+        const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB in bytes
+        for (const photo of placeData.photos) {
+          if (photo instanceof File && photo.size > MAX_FILE_SIZE) {
+            throw new Error(`Photo ${photo.name} is too large. Maximum size is 10MB`);
+          }
+        }
+      }
+
+      return this.repository.updatePlace(id, placeData, userId);
+    } catch (error) {
+      console.error('Error in PlaceService.updatePlace:', error);
+      throw error;
+    }
   }
 
   async deletePlace(id: string, userId: string): Promise<void> {

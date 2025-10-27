@@ -85,23 +85,41 @@ export class PlaceRepository {
   }
 
   async createPlace(placeData: CreatePlaceForm, userId: string): Promise<Place> {
+    console.log('PlaceRepository.createPlace - Received data:', {
+      photoCount: placeData.photos?.length || 0,
+      photos: placeData.photos?.map(p => ({ name: p.name, size: p.size, type: p.type }))
+    });
+
     // Upload photos to Supabase Storage
     const photoUrls: string[] = [];
+    if (!placeData.photos || placeData.photos.length === 0) {
+      console.warn('No photos provided for place creation');
+      throw new Error('At least one photo is required');
+    }
+
     for (const photo of placeData.photos) {
-      const fileName = `${Date.now()}-${Math.random().toString(36).substring(7)}`;
+      console.log('Uploading photo:', photo.name, 'Size:', photo.size);
+
+      // Preserve file extension for proper MIME type handling
+      const fileExt = photo.name.split('.').pop();
+      const fileName = `${Date.now()}-${Math.random().toString(36).substring(7)}.${fileExt}`;
+
+      console.log('Uploading to Supabase storage with filename:', fileName);
       const { error: uploadError } = await supabase.storage
         .from('place-photos')
         .upload(fileName, photo);
 
       if (uploadError) {
         console.error('Error uploading photo:', uploadError);
-        throw new Error('Failed to upload photo');
+        throw new Error(`Failed to upload photo: ${uploadError.message}`);
       }
 
+      console.log('Photo uploaded successfully, getting public URL...');
       const { data: { publicUrl } } = supabase.storage
         .from('place-photos')
         .getPublicUrl(fileName);
 
+      console.log('Public URL:', publicUrl);
       photoUrls.push(publicUrl);
     }
 
@@ -147,13 +165,64 @@ export class PlaceRepository {
     };
   }
 
-  async updatePlace(id: string, updateData: Omit<Partial<CreatePlaceForm>, 'photos'>, userId: string): Promise<Place> {
+  async updatePlace(
+    id: string,
+    updateData: Partial<CreatePlaceForm>,
+    userId: string
+  ): Promise<Place> {
+    // Handle photo uploads if new photos are provided
+    let photoUrls: string[] | undefined;
+    if ('photos' in updateData && updateData.photos && updateData.photos.length > 0) {
+      // Get existing place to preserve old photos if needed
+      const existingPlace = await this.getPlaceById(id);
+
+      // Upload new photos
+      photoUrls = [];
+      for (const photo of updateData.photos as File[]) {
+        // Preserve file extension for proper MIME type handling
+        const fileExt = photo.name.split('.').pop();
+        const fileName = `${Date.now()}-${Math.random().toString(36).substring(7)}.${fileExt}`;
+
+        const { error: uploadError } = await supabase.storage
+          .from('place-photos')
+          .upload(fileName, photo);
+
+        if (uploadError) {
+          console.error('Error uploading photo:', uploadError);
+          throw new Error('Failed to upload photo');
+        }
+
+        const { data: { publicUrl } } = supabase.storage
+          .from('place-photos')
+          .getPublicUrl(fileName);
+
+        photoUrls.push(publicUrl);
+      }
+
+      // Optionally replace all photos or keep old ones and add new ones
+      // For now, we'll replace all photos with the new ones
+      // You can modify this behavior based on your requirements
+    }
+
+    // Prepare update data
+    const updatePayload: any = {
+      ...updateData,
+      updatedAt: new Date().toISOString()
+    };
+
+    // Remove photos from updatePayload if we're handling it separately
+    if ('photos' in updatePayload) {
+      delete updatePayload.photos;
+    }
+
+    // Add photoUrls if we uploaded new photos
+    if (photoUrls) {
+      updatePayload.photos = photoUrls;
+    }
+
     const { data, error } = await supabase
       .from('places')
-      .update({
-        ...updateData,
-        updatedAt: new Date().toISOString()
-      })
+      .update(updatePayload)
       .eq('id', id)
       .eq('userId', userId)
       .select(`
@@ -318,7 +387,7 @@ export class PlaceRepository {
       .order('createdAt', { ascending: false });
 
     if (error) throw error;
-    
+
     return (data?.filter(favorite => favorite.place).map(favorite => ({
       ...favorite.place!,
       photos: favorite.place!.photos || [],

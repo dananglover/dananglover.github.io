@@ -59,7 +59,9 @@ VITE_SUPABASE_ANON_KEY=your_supabase_anon_key
 1. Create a new Supabase project
 2. Run the SQL from `database_schema.sql` in your Supabase SQL editor
 3. Configure Google OAuth in Supabase Auth settings
-4. Create storage buckets: `place-photos` and `blog-images`
+4. **⚠️ IMPORTANT**: Set up Supabase Storage - see `SUPABASE_STORAGE_SETUP.md` for detailed instructions
+   - Create storage buckets: `place-photos` and `blog-images`
+   - Run the storage policies SQL from `database_policies.sql`
 
 ### 3. **Install Dependencies**
 
